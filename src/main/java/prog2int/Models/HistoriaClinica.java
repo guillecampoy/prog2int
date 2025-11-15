@@ -47,9 +47,9 @@ public class HistoriaClinica extends Base {
         super();
     }
 
-    public HistoriaClinica(String nroHistoria, GrupoSanguineo grupoSanguineo, String antecedentes, 
-                          String medicacionActual, String observaciones, int id, boolean eliminado) {
-        super( id, eliminado);
+    public HistoriaClinica(int id, boolean eliminado, String nroHistoria, GrupoSanguineo grupoSanguineo, String antecedentes, 
+                          String medicacionActual, String observaciones) {
+        super(id, eliminado);
         this.nroHistoria = nroHistoria;
         this.grupoSanguineo = grupoSanguineo;
         this.antecedentes = antecedentes;
