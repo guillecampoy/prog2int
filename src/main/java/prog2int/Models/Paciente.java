@@ -87,7 +87,19 @@ public class Paciente extends Base {
     public void setHistoriaClinica(HistoriaClinica historiaClinica) {
         this.historiaClinica = historiaClinica;
     }
- public String detalleHistoriaClinica() {
+    /**
+     * Returns a formatted string detailing the patient's clinical history.
+     * <p>
+     * If the patient does not have an associated clinical history, returns
+     * "El paciente no tiene historia clínica asociada.".
+     * <p>
+     * If the patient has a clinical history, returns a multi-line string with labels and values,
+     * including patient name, DNI, history number, blood group, antecedents, current medication,
+     * observations, and history status. Each field is presented on a separate line.
+     *
+     * @return Formatted string with clinical history details, or a message if none is associated.
+     */
+    public String detalleHistoriaClinica() {
         if (historiaClinica == null) {
             return "El paciente no tiene historia clínica asociada.";
         }
