@@ -3,10 +3,27 @@ package prog2int.Models;
 
 import java.time.LocalDate;
 
+/**
+ * Representa un paciente en el sistema de gestión clínica.
+ * <p>
+ * Esta entidad almacena información personal del paciente, incluyendo nombre, apellido,
+ * DNI (Documento Nacional de Identidad, único por paciente), y fecha de nacimiento.
+ * <p>
+ * Relación con otras entidades:
+ * <ul>
+ *   <li>Posee una relación 1:1 unidireccional con {@link HistoriaClinica}, que almacena el historial médico del paciente.</li>
+ * </ul>
+ * <p>
+ * Mapeo a base de datos:
+ * <ul>
+ *   <li>Tabla: <b>Paciente</b></li>
+ *   <li>Campos: id (heredado de {@link Base}), nombre, apellido, dni, fechaNacimiento, eliminado, historiaClinica</li>
+ *   <li>Regla de negocio: El campo <b>dni</b> debe ser único para cada paciente.</li>
+ * </ul>
+ * <p>
+ * Hereda de {@link Base}, que provee el identificador único y el estado de eliminación lógica.
+ */
 public class Paciente extends Base {
-
-    private String nombre;
-
     private String apellido;
 
     private String dni;
