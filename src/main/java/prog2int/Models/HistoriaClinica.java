@@ -137,11 +137,11 @@ public class HistoriaClinica extends Base {
                "Número: " + nroHistoria + "\n" +
                "Grupo Sanguíneo: " + getGrupoSanguineoSymbol() + "\n" +
                "Antecedentes: " + (antecedentes != null && !antecedentes.isEmpty() ? 
-                   antecedentes + "..." : "No registrados") + "\n" +
+                   antecedentes : "No registrados") + "\n" +
                "Medicación Actual: " + (medicacionActual != null && !medicacionActual.isEmpty() ? 
-                   medicacionActual + "..." : "No registrada") + "\n" +
+                   medicacionActual : "No registrada") + "\n" +
                "Observaciones: " + (observaciones != null && !observaciones.isEmpty() ? 
-                   observaciones + "..." : "No registradas") + "\n" +
+                   observaciones : "No registradas") + "\n" +
                   "Estado: " + (isEliminado() ? "ELIMINADA" : "ACTIVA");
     }
 }
