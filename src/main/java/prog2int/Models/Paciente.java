@@ -26,6 +26,8 @@ import java.time.LocalDate;
 public class Paciente extends Base {
     private String apellido;
 
+    private String nombre;
+
     private String dni;
 
     private LocalDate fechaNacimiento;

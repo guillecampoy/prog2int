@@ -1,8 +1,8 @@
-package prog2int.Service;
+package prog2int.Services;
 
 import java.util.List;
 import prog2int.Dao.GenericDAO;
-import prog2int.Models.Domicilio;
+import prog2int.Models.HistoriaClinica;
 
 /**
  * Implementación del servicio de negocio para la entidad Domicilio.
@@ -16,26 +16,26 @@ import prog2int.Models.Domicilio;
  *
  * Patrón: Service Layer con inyección de dependencias
  */
-public class DomicilioServiceImpl implements GenericService<Domicilio> {
+public class HistoriaClinicaServiceImpl implements GenericService<HistoriaClinica> {
     /**
      * DAO para acceso a datos de domicilios.
      * Inyectado en el constructor (Dependency Injection).
      * Usa GenericDAO para permitir testing con mocks.
      */
-    private final GenericDAO<Domicilio> domicilioDAO;
+    private final GenericDAO<HistoriaClinica> historiaClinicaDao;
 
     /**
      * Constructor con inyección de dependencias.
      * Valida que el DAO no sea null (fail-fast).
      *
-     * @param domicilioDAO DAO de domicilios (normalmente DomicilioDAO)
+     * @param historiaClinicaDAO DAO de domicilios (normalmente DomicilioDAO)
      * @throws IllegalArgumentException si domicilioDAO es null
      */
-    public DomicilioServiceImpl(GenericDAO<Domicilio> domicilioDAO) {
-        if (domicilioDAO == null) {
+    public HistoriaClinicaServiceImpl(GenericDAO<HistoriaClinica> historiaClinicaDAO) {
+        if (historiaClinicaDAO == null) {
             throw new IllegalArgumentException("DomicilioDAO no puede ser null");
         }
-        this.domicilioDAO = domicilioDAO;
+        this.historiaClinicaDao = historiaClinicaDAO;
     }
 
     /**
@@ -46,13 +46,13 @@ public class DomicilioServiceImpl implements GenericService<Domicilio> {
      * 2. Delega al DAO para insertar
      * 3. El DAO asigna el ID autogenerado al objeto domicilio
      *
-     * @param domicilio Domicilio a insertar (id será ignorado y regenerado)
+     * @param historiaClinica Domicilio a insertar (id será ignorado y regenerado)
      * @throws Exception Si la validación falla o hay error de BD
      */
     @Override
-    public void insertar(Domicilio domicilio) throws Exception {
-        validateDomicilio(domicilio);
-        domicilioDAO.insertar(domicilio);
+    public void insertar(HistoriaClinica historiaClinica) throws Exception {
+        validateHistoriaClinica(historiaClinica);
+        historiaClinicaDao.insertar(historiaClinica);
     }
 
     /**
@@ -65,16 +65,16 @@ public class DomicilioServiceImpl implements GenericService<Domicilio> {
      * IMPORTANTE: Si varias personas comparten este domicilio,
      * la actualización los afectará a TODAS (RN-040).
      *
-     * @param domicilio Domicilio con los datos actualizados
+     * @param historiaClinica Domicilio con los datos actualizados
      * @throws Exception Si la validación falla o el domicilio no existe
      */
     @Override
-    public void actualizar(Domicilio domicilio) throws Exception {
-        validateDomicilio(domicilio);
-        if (domicilio.getId() <= 0) {
+    public void actualizar(HistoriaClinica historiaClinica) throws Exception {
+        validateHistoriaClinica(historiaClinica);
+        if (historiaClinica.getId() <= 0) {
             throw new IllegalArgumentException("El ID del domicilio debe ser mayor a 0 para actualizar");
         }
-        domicilioDAO.actualizar(domicilio);
+        historiaClinicaDao.actualizar(historiaClinica);
     }
 
     /**
@@ -95,7 +95,7 @@ public class DomicilioServiceImpl implements GenericService<Domicilio> {
         if (id <= 0) {
             throw new IllegalArgumentException("El ID debe ser mayor a 0");
         }
-        domicilioDAO.eliminar(id);
+        historiaClinicaDao.eliminar(id);
     }
 
     /**
@@ -106,11 +106,11 @@ public class DomicilioServiceImpl implements GenericService<Domicilio> {
      * @throws Exception Si id <= 0 o hay error de BD
      */
     @Override
-    public Domicilio getById(int id) throws Exception {
+    public HistoriaClinica getById(int id) throws Exception {
         if (id <= 0) {
             throw new IllegalArgumentException("El ID debe ser mayor a 0");
         }
-        return domicilioDAO.getById(id);
+        return historiaClinicaDao.getById(id);
     }
 
     /**
@@ -120,8 +120,8 @@ public class DomicilioServiceImpl implements GenericService<Domicilio> {
      * @throws Exception Si hay error de BD
      */
     @Override
-    public List<Domicilio> getAll() throws Exception {
-        return domicilioDAO.getAll();
+    public List<HistoriaClinica> getAll() throws Exception {
+        return historiaClinicaDao.getAll();
     }
 
     /**
@@ -131,18 +131,20 @@ public class DomicilioServiceImpl implements GenericService<Domicilio> {
      * - RN-023: Calle y número son obligatorios
      * - RN-024: Se verifica trim() para evitar strings solo con espacios
      *
-     * @param domicilio Domicilio a validar
+     * @param historiaClinica Domicilio a validar
      * @throws IllegalArgumentException Si alguna validación falla
      */
-    private void validateDomicilio(Domicilio domicilio) {
-        if (domicilio == null) {
-            throw new IllegalArgumentException("El domicilio no puede ser null");
+    private void validateHistoriaClinica(HistoriaClinica historiaClinica) throws Exception {
+        if (historiaClinica == null) {
+            throw new IllegalArgumentException("La historia clínica no puede ser null");
         }
-        if (domicilio.getCalle() == null || domicilio.getCalle().trim().isEmpty()) {
-            throw new IllegalArgumentException("La calle no puede estar vacía");
+        // validación falopa
+        if (historiaClinica.getNroHistoria() == null || (historiaClinica.getId() != 0)) {
+            throw new IllegalArgumentException("El id no puede ser 0");
         }
-        if (domicilio.getNumero() == null || domicilio.getNumero().trim().isEmpty()) {
+        /*
+        if (historiaClinica.getNumero() == null || domicilio.getNumero().trim().isEmpty()) {
             throw new IllegalArgumentException("El número no puede estar vacío");
-        }
+        }*/
     }
 }
