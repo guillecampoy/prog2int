@@ -11,8 +11,8 @@ import java.util.List;
 
 import prog2int.Config.DatabaseConnection;
 import prog2int.Models.HistoriaClinica;
-import prog2int.Models.Paciente;
 import prog2int.Models.HistoriaClinica.GrupoSanguineo;
+import prog2int.Models.Paciente;
 
 /**
  * Data Access Object (DAO) para la entidad {@link Paciente}.
@@ -89,40 +89,40 @@ public class PacienteDAO implements GenericDAO<Paciente> {
      * Solo retorna pacientes activos (eliminado=FALSE)
      * Realiza LEFT JOIN con la tabla historias_clinicas
      */
-    private static final String SELECT_BY_ID_SQL = "SELECT p.id, p.nombre, p.apellido, p.dni, p.fecha_nacimiento, " +
-    "hc.id, hc.nro_historia, hc.grupo_sanguineo, hc.antecedentes, hc.medicacion_actual, hc.observaciones " + 
+    private static final String SELECT_BY_ID_SQL = "SELECT p.id, p.nombre, p.apellido, p.dni, p.fecha_nacimiento, p.eliminado " +
+    "hc.id, hc.nro_historia, hc.grupo_sanguineo, hc.antecedentes, hc.medicacion_actual, hc.observaciones, hc.eliminado " + 
     "FROM paciente p LEFT JOIN historias_clinicas hc ON p.id = hc.paciente_id " + 
-    "WHERE p.id = ? AND eliminado = FALSE";
+    "WHERE p.id = ? AND p.eliminado = FALSE";
 
     /**
      * Sentencia SQL para obtener todos los pacientes activos con sus historias clínicas
      * Filtra por eliminado=FALSE (solo pacientes activos)
      * Realiza LEFT JOIN con la tabla historias_clinicas
      */
-    private static final String SELECT_ALL_SQL = "SELECT p.id, p.nombre, p.apellido, p.dni, p.fecha_nacimiento, " + 
-        "hc.id, hc.nro_historia, hc.grupo_sanguineo, hc.antecedentes, hc.medicacion_actual, hc.observaciones " + 
+    private static final String SELECT_ALL_SQL = "SELECT p.id, p.nombre, p.apellido, p.dni, p.fecha_nacimiento, p.eliminado, " + 
+        "hc.id, hc.nro_historia, hc.grupo_sanguineo, hc.antecedentes, hc.medicacion_actual, hc.observaciones, hc.eliminado " + 
         "FROM paciente p LEFT JOIN historias_clinicas hc ON p.id = hc.paciente_id " + 
-        "WHERE eliminado = FALSE";
+        "WHERE p.eliminado = FALSE";
 
     /**
      * Sentencia SQL para buscar pacientes por nombre o apellido (búsqueda parcial)
      * Solo retorna pacientes activos (eliminado=FALSE)
      * Usa LIKE para búsqueda parcial en nombre o apellido
      */
-    private static final String SEARCH_BY_NAME_SQL = "SELECT p.id, p.nombre, p.apellido, p.dni, p.fecha_nacimiento, " + 
-        "hc.id, hc.nro_historia, hc.grupo_sanguineo, hc.antecedentes, hc.medicacion_actual, hc.observaciones " + 
+    private static final String SEARCH_BY_NAME_SQL = "SELECT p.id, p.nombre, p.apellido, p.dni, p.fecha_nacimiento, p.eliminado, " + 
+        "hc.id, hc.nro_historia, hc.grupo_sanguineo, hc.antecedentes, hc.medicacion_actual, hc.observaciones, hc.eliminado " + 
         "FROM paciente p LEFT JOIN historias_clinicas hc ON p.id = hc.paciente_id " + 
-        "WHERE eliminado = FALSE AND (p.nombre LIKE ? OR p.apellido LIKE ?)";
+        "WHERE p.eliminado = FALSE AND (p.nombre LIKE ? OR p.apellido LIKE ?)";
 
     /**
      * Sentencia SQL para buscar un paciente por su DNI exacto
      * Solo retorna pacientes activos (eliminado=FALSE)
      * Usa comparación exacta del campo DNI
      */
-    private static final String SEARCH_BY_DNI_SQL = "SELECT p.id, p.nombre, p.apellido, p.dni, p.fecha_nacimiento, " + 
-        "hc.id, hc.nro_historia, hc.grupo_sanguineo, hc.antecedentes, hc.medicacion_actual, hc.observaciones " + 
+    private static final String SEARCH_BY_DNI_SQL = "SELECT p.id, p.nombre, p.apellido, p.dni, p.fecha_nacimiento, p.eliminado, " + 
+        "hc.id, hc.nro_historia, hc.grupo_sanguineo, hc.antecedentes, hc.medicacion_actual, hc.observaciones, hc.eliminado " + 
         "FROM paciente p LEFT JOIN historias_clinicas hc ON p.id = hc.paciente_id " + 
-        "WHERE p.dni = ? AND eliminado = FALSE";
+        "WHERE p.dni = ? AND p.eliminado = FALSE";
 
     // =============================================================
     // CONSTANTES SQL - CONSULTAS DE AUDITORÍA (incluye eliminados)
@@ -133,8 +133,8 @@ public class PacienteDAO implements GenericDAO<Paciente> {
      * Usado para propósitos de auditoría y reportes
      * Realiza LEFT JOIN con la tabla historias_clinicas
      */
-    private static final String SELECT_BY_ID_AUDIT_SQL = "SELECT p.id, p.nombre, p.apellido, p.dni, p.fecha_nacimiento, " +
-    "hc.id, hc.nro_historia, hc.grupo_sanguineo, hc.antecedentes, hc.medicacion_actual, hc.observaciones " + 
+    private static final String SELECT_BY_ID_AUDIT_SQL = "SELECT p.id, p.nombre, p.apellido, p.dni, p.fecha_nacimiento, p.eliminado, " +
+    "hc.id, hc.nro_historia, hc.grupo_sanguineo, hc.antecedentes, hc.medicacion_actual, hc.observaciones, hc.eliminado " + 
     "FROM paciente p LEFT JOIN historias_clinicas hc ON p.id = hc.paciente_id " + 
     "WHERE p.id = ?";
 
@@ -143,8 +143,8 @@ public class PacienteDAO implements GenericDAO<Paciente> {
      * Usado para propósitos de auditoría y reportes
      * Realiza LEFT JOIN con la tabla historias_clinicas
      */
-    private static final String SELECT_ALL_AUDIT_SQL = "SELECT p.id, p.nombre, p.apellido, p.dni, p.fecha_nacimiento, " + 
-        "hc.id, hc.nro_historia, hc.grupo_sanguineo, hc.antecedentes, hc.medicacion_actual, hc.observaciones " + 
+    private static final String SELECT_ALL_AUDIT_SQL = "SELECT p.id, p.nombre, p.apellido, p.dni, p.fecha_nacimiento, p.eliminado, " + 
+        "hc.id, hc.nro_historia, hc.grupo_sanguineo, hc.antecedentes, hc.medicacion_actual, hc.observaciones, hc.eliminado " + 
         "FROM paciente p LEFT JOIN historias_clinicas hc ON p.id = hc.paciente_id";
 
     /**
@@ -152,8 +152,8 @@ public class PacienteDAO implements GenericDAO<Paciente> {
      * Usado para propósitos de auditoría y reportes
      * Usa LIKE para búsqueda parcial en nombre o apellido
      */
-    private static final String SEARCH_BY_NAME_AUDIT_SQL = "SELECT p.id, p.nombre, p.apellido, p.dni, p.fecha_nacimiento, " + 
-        "hc.id, hc.nro_historia, hc.grupo_sanguineo, hc.antecedentes, hc.medicacion_actual, hc.observaciones " + 
+    private static final String SEARCH_BY_NAME_AUDIT_SQL = "SELECT p.id, p.nombre, p.apellido, p.dni, p.fecha_nacimiento, p.eliminado, " + 
+        "hc.id, hc.nro_historia, hc.grupo_sanguineo, hc.antecedentes, hc.medicacion_actual, hc.observaciones, hc.eliminado " + 
         "FROM paciente p LEFT JOIN historias_clinicas hc ON p.id = hc.paciente_id " + 
         "WHERE (p.nombre LIKE ? OR p.apellido LIKE ?)";
 
@@ -162,7 +162,7 @@ public class PacienteDAO implements GenericDAO<Paciente> {
      * Usado para propósitos de auditoría y reportes
      * Usa comparación exacta del campo DNI
      */
-    private static final String SEARCH_BY_DNI_AUDIT_SQL = "SELECT p.id, p.nombre, p.apellido, p.dni, p.fecha_nacimiento, " + 
+    private static final String SEARCH_BY_DNI_AUDIT_SQL = "SELECT p.id, p.nombre, p.apellido, p.dni, p.fecha_nacimiento, p.eliminado, " + 
         "hc.id, hc.nro_historia, hc.grupo_sanguineo, hc.antecedentes, hc.medicacion_actual, hc.observaciones " + 
         "FROM paciente p LEFT JOIN historias_clinicas hc ON p.id = hc.paciente_id " + 
         "WHERE p.dni = ?";
@@ -203,7 +203,7 @@ public class PacienteDAO implements GenericDAO<Paciente> {
     @Override
     public void insertar(Paciente paciente) throws Exception {
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(INSERT_SQL)) {
+             PreparedStatement stmt = conn.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS)) {
             
             setPacienteParameters(stmt, paciente);
             stmt.executeUpdate();
@@ -220,7 +220,7 @@ public class PacienteDAO implements GenericDAO<Paciente> {
      */
     @Override
     public void insertTx(Paciente paciente, Connection conn) throws Exception {
-        try (PreparedStatement stmt = conn.prepareStatement(INSERT_SQL)) {
+        try (PreparedStatement stmt = conn.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS)) {
             
             setPacienteParameters(stmt, paciente);
             stmt.executeUpdate();
@@ -782,12 +782,12 @@ public class PacienteDAO implements GenericDAO<Paciente> {
      */
     private Paciente mapResultSetToPaciente(ResultSet rs) throws SQLException {
         Paciente paciente = new Paciente();
-        paciente.setId(rs.getInt("id"));
-        paciente.setNombre(rs.getString("nombre"));
-        paciente.setApellido(rs.getString("apellido"));
-        paciente.setDni(rs.getString("dni"));
-        paciente.setFechaNacimiento(rs.getDate("fecha_nacimiento").toLocalDate());
-        paciente.setEliminado(rs.getBoolean("eliminado"));
+        paciente.setId(rs.getInt("p.id"));
+        paciente.setNombre(rs.getString("p.nombre"));
+        paciente.setApellido(rs.getString("p.apellido"));
+        paciente.setDni(rs.getString("p.dni"));
+        paciente.setFechaNacimiento(rs.getDate("p.fecha_nacimiento").toLocalDate());
+        paciente.setEliminado(rs.getBoolean("p.eliminado"));
 
         if (rs.getInt("hc.id") > 0 && !rs.wasNull()) {
             HistoriaClinica historiaClinica = new HistoriaClinica();
@@ -796,8 +796,8 @@ public class PacienteDAO implements GenericDAO<Paciente> {
             historiaClinica.setGrupoSanguineo(GrupoSanguineo.valueOf(rs.getString("grupo_sanguineo")));
             historiaClinica.setAntecedentes(rs.getString("hc.antecedentes"));
             historiaClinica.setMedicacionActual(rs.getString("hc.medicacion_actual"));
-            historiaClinica.setObservaciones(rs.getString("observaciones"));
-            historiaClinica.setEliminado(rs.getBoolean("eliminado"));
+            historiaClinica.setObservaciones(rs.getString("hc.observaciones"));
+            historiaClinica.setEliminado(rs.getBoolean("hc.eliminado"));
             paciente.setHistoriaClinica(historiaClinica);
         }
 
