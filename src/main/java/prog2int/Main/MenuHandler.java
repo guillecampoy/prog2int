@@ -425,7 +425,7 @@ public class MenuHandler {
      * - NO deja referencias huérfanas
      * - Implementa eliminación segura recomendada en RN-029
      *
-     * Este es el método RECOMENDADO para eliminar domicilios en producción.
+     * Este es el método RECOMENDADO para eliminar historias clínicas en producción.
      */
     public void buscarHistoriaPorNumero() {
         try {
