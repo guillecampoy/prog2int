@@ -131,7 +131,7 @@ Ejecutar el siguiente script SQL en MySQL:
 CREATE DATABASE IF NOT EXISTS db_historiaclinica;
 USE db_historiaclinica;
 
-CREATE TABLE pacientes (
+CREATE TABLE paciente (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL,
     apellido VARCHAR(50) NOT NULL,
