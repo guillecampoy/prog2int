@@ -5,12 +5,12 @@ import prog2int.Dao.GenericDAO;
 import prog2int.Models.HistoriaClinica;
 
 /**
- * Implementación del servicio de negocio para la entidad Domicilio.
+ * Implementación del servicio de negocio para la entidad HistoriaClinica.
  * Capa intermedia entre la UI y el DAO que aplica validaciones de negocio.
  *
  * Responsabilidades:
- * - Validar que los datos del domicilio sean correctos ANTES de persistir
- * - Aplicar reglas de negocio (RN-023: calle y número obligatorios)
+ * - Validar que los datos de la historia clínica sean correctos ANTES de persistir
+ * - Aplicar reglas de negocio (número de historia y grupo sanguíneo obligatorios)
  * - Delegar operaciones de BD al DAO
  * - Transformar excepciones técnicas en errores de negocio comprensibles
  *
@@ -18,7 +18,7 @@ import prog2int.Models.HistoriaClinica;
  */
 public class HistoriaClinicaServiceImpl implements GenericService<HistoriaClinica> {
     /**
-     * DAO para acceso a datos de domicilios.
+     * DAO para acceso a datos de historias clínicas.
      * Inyectado en el constructor (Dependency Injection).
      * Usa GenericDAO para permitir testing con mocks.
      */
@@ -28,25 +28,25 @@ public class HistoriaClinicaServiceImpl implements GenericService<HistoriaClinic
      * Constructor con inyección de dependencias.
      * Valida que el DAO no sea null (fail-fast).
      *
-     * @param historiaClinicaDAO DAO de domicilios (normalmente DomicilioDAO)
-     * @throws IllegalArgumentException si domicilioDAO es null
+     * @param historiaClinicaDAO DAO de historias clínicas
+     * @throws IllegalArgumentException si historiaClinicaDAO es null
      */
     public HistoriaClinicaServiceImpl(GenericDAO<HistoriaClinica> historiaClinicaDAO) {
         if (historiaClinicaDAO == null) {
-            throw new IllegalArgumentException("DomicilioDAO no puede ser null");
+            throw new IllegalArgumentException("HistoriaClinicaDAO no puede ser null");
         }
         this.historiaClinicaDao = historiaClinicaDAO;
     }
 
     /**
-     * Inserta un nuevo domicilio en la base de datos.
+     * Inserta una nueva historia clínica en la base de datos.
      *
      * Flujo:
-     * 1. Valida que calle y número no estén vacíos
+     * 1. Valida que número de historia y grupo sanguíneo no estén vacíos
      * 2. Delega al DAO para insertar
-     * 3. El DAO asigna el ID autogenerado al objeto domicilio
+     * 3. El DAO asigna el ID autogenerado al objeto
      *
-     * @param historiaClinica Domicilio a insertar (id será ignorado y regenerado)
+     * @param historiaClinica Historia clínica a insertar (id será ignorado y regenerado)
      * @throws Exception Si la validación falla o hay error de BD
      */
     @Override
@@ -56,39 +56,30 @@ public class HistoriaClinicaServiceImpl implements GenericService<HistoriaClinic
     }
 
     /**
-     * Actualiza un domicilio existente en la base de datos.
+     * Actualiza una historia clínica existente en la base de datos.
      *
      * Validaciones:
-     * - El domicilio debe tener datos válidos (calle, número)
-     * - El ID debe ser > 0 (debe ser un domicilio ya persistido)
+     * - La historia clínica debe tener datos válidos
+     * - El ID debe ser > 0 (debe ser una historia ya persistida)
      *
-     * IMPORTANTE: Si varias personas comparten este domicilio,
-     * la actualización los afectará a TODAS (RN-040).
-     *
-     * @param historiaClinica Domicilio con los datos actualizados
-     * @throws Exception Si la validación falla o el domicilio no existe
+     * @param historiaClinica Historia clínica con los datos actualizados
+     * @throws Exception Si la validación falla o la historia clínica no existe
      */
     @Override
     public void actualizar(HistoriaClinica historiaClinica) throws Exception {
         validateHistoriaClinica(historiaClinica);
         if (historiaClinica.getId() <= 0) {
-            throw new IllegalArgumentException("El ID del domicilio debe ser mayor a 0 para actualizar");
+            throw new IllegalArgumentException("El ID de la historia clínica debe ser mayor a 0 para actualizar");
         }
         historiaClinicaDao.actualizar(historiaClinica);
     }
 
     /**
-     * Elimina lógicamente un domicilio (soft delete).
-     * Marca el domicilio como eliminado=TRUE sin borrarlo físicamente.
+     * Elimina lógicamente una historia clínica (soft delete).
+     * Marca la historia clínica como eliminado=TRUE sin borrarla físicamente.
      *
-     * ⚠️ ADVERTENCIA: Este método NO verifica si hay personas asociadas.
-     * Puede dejar referencias huérfanas en personas.domicilio_id (RN-029).
-     *
-     * ALTERNATIVA SEGURA: Usar PersonaServiceImpl.eliminarDomicilioDePersona()
-     * que actualiza la FK antes de eliminar (opción 10 del menú).
-     *
-     * @param id ID del domicilio a eliminar
-     * @throws Exception Si id <= 0 o no existe el domicilio
+     * @param id ID de la historia clínica a eliminar
+     * @throws Exception Si id <= 0 o no existe la historia clínica
      */
     @Override
     public void eliminar(int id) throws Exception {
@@ -99,10 +90,10 @@ public class HistoriaClinicaServiceImpl implements GenericService<HistoriaClinic
     }
 
     /**
-     * Obtiene un domicilio por su ID.
+     * Obtiene una historia clínica por su ID.
      *
-     * @param id ID del domicilio a buscar
-     * @return Domicilio encontrado, o null si no existe o está eliminado
+     * @param id ID de la historia clínica a buscar
+     * @return Historia clínica encontrada, o null si no existe o está eliminada
      * @throws Exception Si id <= 0 o hay error de BD
      */
     @Override
@@ -114,9 +105,9 @@ public class HistoriaClinicaServiceImpl implements GenericService<HistoriaClinic
     }
 
     /**
-     * Obtiene todos los domicilios activos (eliminado=FALSE).
+     * Obtiene todas las historias clínicas activas (eliminado=FALSE).
      *
-     * @return Lista de domicilios activos (puede estar vacía)
+     * @return Lista de historias clínicas activas (puede estar vacía)
      * @throws Exception Si hay error de BD
      */
     @Override
@@ -125,26 +116,50 @@ public class HistoriaClinicaServiceImpl implements GenericService<HistoriaClinic
     }
 
     /**
-     * Valida que un domicilio tenga datos correctos.
+     * Expone el DAO para coordinación transaccional.
+     * Usado por PacienteHistoriaClinicaService.
+     */
+    public GenericDAO<HistoriaClinica> getHistoriaClinicaDAO() {
+        return this.historiaClinicaDao;
+    }
+
+    /**
+     * Valida que una historia clínica tenga datos correctos.
      *
      * Reglas de negocio aplicadas:
-     * - RN-023: Calle y número son obligatorios
-     * - RN-024: Se verifica trim() para evitar strings solo con espacios
+     * - Número de historia es obligatorio y debe tener formato válido (HC-XXXX)
+     * - Grupo sanguíneo es obligatorio
+     * - Se verifica trim() para evitar strings solo con espacios
      *
-     * @param historiaClinica Domicilio a validar
+     * @param historiaClinica Historia clínica a validar
      * @throws IllegalArgumentException Si alguna validación falla
      */
     private void validateHistoriaClinica(HistoriaClinica historiaClinica) throws Exception {
         if (historiaClinica == null) {
             throw new IllegalArgumentException("La historia clínica no puede ser null");
         }
-        // validación falopa
-        if (historiaClinica.getNroHistoria() == null || (historiaClinica.getId() != 0)) {
-            throw new IllegalArgumentException("El id no puede ser 0");
+        if (historiaClinica.getNroHistoria() == null || historiaClinica.getNroHistoria().trim().isEmpty()) {
+            throw new IllegalArgumentException("El número de historia no puede estar vacío");
         }
-        /*
-        if (historiaClinica.getNumero() == null || domicilio.getNumero().trim().isEmpty()) {
-            throw new IllegalArgumentException("El número no puede estar vacío");
-        }*/
+        if (historiaClinica.getGrupoSanguineo() == null) {
+            throw new IllegalArgumentException("El grupo sanguíneo no puede ser null");
+        }
+        validateNroHistoriaFormat(historiaClinica.getNroHistoria());
+    }
+
+    /**
+     * Valida el formato del número de historia.
+     * Formato esperado: HC-XXXX donde XXXX son 4 dígitos
+     * Ejemplos válidos: HC-0001, HC-1234, HC-9999
+     *
+     * @param nroHistoria Número de historia a validar
+     * @throws IllegalArgumentException Si el formato es inválido
+     */
+    private void validateNroHistoriaFormat(String nroHistoria) {
+        if (!nroHistoria.matches("^HC-\\d{4}$")) {
+            throw new IllegalArgumentException(
+                "El número de historia debe tener el formato HC-XXXX (ej: HC-0001)"
+            );
+        }
     }
 }
