@@ -48,16 +48,16 @@ public class AppMenu {
      *
      * Flujo de inicialización:
      * 1. Crea Scanner único para toda la aplicación
-     * 2. Crea cadena de dependencias (DAOs → Services) mediante createPersonaService()
-     * 3. Crea MenuHandler con Scanner y PersonaService
+     * 2. Crea cadena de dependencias (DAOs → Services) mediante createPacienteService()
+     * 3. Crea MenuHandler con Scanner y PacienteService
      * 4. Setea running=true para iniciar el loop
      *
      * Patrón de inyección de dependencias (DI) manual:
-     * - DomicilioDAO (sin dependencias)
-     * - PersonaDAO (depende de DomicilioDAO)
-     * - DomicilioServiceImpl (depende de DomicilioDAO)
-     * - PersonaServiceImpl (depende de PersonaDAO y DomicilioServiceImpl)
-     * - MenuHandler (depende de Scanner y PersonaServiceImpl)
+     * - HistoriaClinicaDAO (sin dependencias)
+     * - PacienteDAO (depende de HistoriaClinicaDAO)
+     * - HistoriaClinicaServiceImpl (depende de HistoriaClinicaDAO)
+     * - PacienteServiceImpl (depende de PacienteDAO y HistoriaClinicaServiceImpl)
+     * - MenuHandler (depende de Scanner y PacienteServiceImpl)
      *
      * Esta inicialización garantiza que todas las dependencias estén correctamente conectadas.
      */
@@ -124,16 +124,16 @@ public class AppMenu {
      * - Permite bloques con {} para múltiples statements
      *
      * Mapeo de opciones (corresponde a MenuDisplay):
-     * 1  → Crear persona (con domicilio opcional)
-     * 2  → Listar personas (todas o filtradas)
-     * 3  → Actualizar persona
-     * 4  → Eliminar persona (soft delete)
-     * 5  → Crear domicilio independiente
-     * 6  → Listar domicilios
-     * 7  → Actualizar domicilio por ID (afecta a todas las personas que lo comparten)
-     * 8  → Eliminar domicilio por ID (PELIGROSO - puede dejar FKs huérfanas)
-     * 9  → Actualizar domicilio de una persona (afecta a todas las personas que lo comparten)
-     * 10 → Eliminar domicilio de una persona (SEGURO - actualiza FK primero)
+     * 1  → Crear paciente (con historia clínica opcional)
+     * 2  → Listar pacientes (todas o filtradas)
+     * 3  → Actualizar paciente
+     * 4  → Eliminar paciente (soft delete)
+     * 5  → Crear historia clínica independiente
+     * 6  → Listar historias clínicas
+     * 7  → Actualizar historia clínica por ID
+     * 8  → Eliminar historia clínica por ID (PELIGROSO - puede dejar FKs huérfanas)
+     * 9  → Actualizar historia clínica
+     * 10 → Eliminar historia clínica de una paciente (SEGURO - actualiza FK primero)
      * 0  → Salir (setea running=false para terminar el loop)
      *
      * Opción inválida: Muestra mensaje y continúa el loop.
@@ -168,31 +168,31 @@ public class AppMenu {
      * Implementa inyección de dependencias manual.
      *
      * Orden de creación (bottom-up desde la capa más baja):
-     * 1. DomicilioDAO: Sin dependencias, acceso directo a BD
-     * 2. PersonaDAO: Depende de DomicilioDAO (inyectado en constructor)
-     * 3. DomicilioServiceImpl: Depende de DomicilioDAO
-     * 4. PersonaServiceImpl: Depende de PersonaDAO y DomicilioServiceImpl
+     * 1. HistoriaClinicaDAO: Sin dependencias, acceso directo a BD
+     * 2. PacienteDAO: Depende de HistoriaClinicaDAO (inyectado en constructor)
+     * 3. HistoriaClinicaServiceImpl: Depende deHistoriaClinicaDAO
+     * 4. PacienteServiceImpl: Depende de PacienteDAO y HistoriaClinicaServiceImpl
      *
      * Arquitectura resultante (4 capas):
      * Main (AppMenu, MenuHandler)
      *   ↓
-     * Service (PersonaServiceImpl, DomicilioServiceImpl)
+     * Service (PacienteServiceImpl, HistoriaClinicaServiceImpl)
      *   ↓
-     * DAO (PersonaDAO, DomicilioDAO)
+     * DAO (PacienteDAO, HistoriaClinicaDAO)
      *   ↓
-     * Models (Persona, Domicilio, Base)
+     * Models (Paciente, HistoriaClinica, Base)
      *
-     * ¿Por qué PersonaDAO necesita DomicilioDAO?
+     * ¿Por qué PacienteDAO necesita HistoriaClinicaDAO?
      * - Actualmente NO lo usa (inyección preparada para futuras operaciones)
      * - Podría usarse para operaciones transaccionales coordinadas
      *
-     * ¿Por qué PersonaService necesita DomicilioService?
-     * - Para insertar/actualizar domicilios al crear/actualizar personas
-     * - Para eliminar domicilios de forma segura (eliminarDomicilioDePersona)
+     * ¿Por qué PacienteService necesita HistoriaClinicaService?
+     * - Para insertar/actualizar historias clínicas al crear/actualizar pacientes
+     * - Para eliminar historias clínicas de forma segura (eliminarHistoriaClinicaDePaciente)
      *
      * Patrón: Factory Method para construcción de dependencias
      *
-     * @return PersonaServiceImpl completamente inicializado con todas sus dependencias
+     * @return PacienteServiceImpl completamente inicializado con todas sus dependencias
      */
 
 }
