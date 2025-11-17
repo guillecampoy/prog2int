@@ -89,7 +89,7 @@ public class PacienteDAO implements GenericDAO<Paciente> {
      * Solo retorna pacientes activos (eliminado=FALSE)
      * Realiza LEFT JOIN con la tabla historias_clinicas
      */
-    private static final String SELECT_BY_ID_SQL = "SELECT p.id, p.nombre, p.apellido, p.dni, p.fecha_nacimiento, p.eliminado " +
+    private static final String SELECT_BY_ID_SQL = "SELECT p.id, p.nombre, p.apellido, p.dni, p.fecha_nacimiento, p.eliminado, " +
     "hc.id, hc.nro_historia, hc.grupo_sanguineo, hc.antecedentes, hc.medicacion_actual, hc.observaciones, hc.eliminado " + 
     "FROM paciente p LEFT JOIN historias_clinicas hc ON p.id = hc.paciente_id " + 
     "WHERE p.id = ? AND p.eliminado = FALSE";
