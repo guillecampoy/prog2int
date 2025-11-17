@@ -4,7 +4,6 @@ import java.util.Scanner;
 import prog2int.Dao.DomicilioDAO;
 import prog2int.Dao.PersonaDAO;
 import prog2int.Service.DomicilioServiceImpl;
-import prog2int.Service.PersonaServiceImpl;
 
 /**
  * Orquestador principal del menú de la aplicación.
@@ -63,7 +62,7 @@ public class AppMenu {
      */
     public AppMenu() {
         this.scanner = new Scanner(System.in);
-        PersonaServiceImpl personaService = createPersonaService();
+        prog2int.Service.PacienteServiceImpl personaService = createPersonaService();
         this.menuHandler = new MenuHandler(scanner, personaService);
         this.running = true;
     }
@@ -191,10 +190,10 @@ public class AppMenu {
      *
      * @return PersonaServiceImpl completamente inicializado con todas sus dependencias
      */
-    private PersonaServiceImpl createPersonaService() {
+    private prog2int.Service.PacienteServiceImpl createPersonaService() {
         DomicilioDAO domicilioDAO = new DomicilioDAO();
         PersonaDAO personaDAO = new PersonaDAO(domicilioDAO);
         DomicilioServiceImpl domicilioService = new DomicilioServiceImpl(domicilioDAO);
-        return new PersonaServiceImpl(personaDAO, domicilioService);
+        return new prog2int.Service.PacienteServiceImpl(personaDAO, domicilioService);
     }
 }

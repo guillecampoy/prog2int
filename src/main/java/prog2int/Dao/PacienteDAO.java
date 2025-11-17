@@ -302,7 +302,7 @@ public class PacienteDAO implements GenericDAO<Paciente> {
      * @param conn Conexión a la base de datos existente
      * @throws Exception Si ocurre un error durante la eliminación o si no se encuentra el paciente
      */
-    public void deleteTx(int id, Connection conn) throws Exception {
+    public void eliminarTx(int id, Connection conn) throws Exception {
         try (PreparedStatement stmt = conn.prepareStatement(DELETE_SQL)) {
 
             stmt.setInt(1, id);
@@ -789,7 +789,7 @@ public class PacienteDAO implements GenericDAO<Paciente> {
         paciente.setFechaNacimiento(rs.getDate("fecha_nacimiento").toLocalDate());
         paciente.setEliminado(rs.getBoolean("eliminado"));
 
-        if (rs.getInt("hs.id") > 0 && !rs.wasNull()) {
+        if (rs.getInt("hc.id") > 0 && !rs.wasNull()) {
             HistoriaClinica historiaClinica = new HistoriaClinica();
             historiaClinica.setId(rs.getInt("hc.id"));
             historiaClinica.setNroHistoria(rs.getString("hc.nro_historia"));

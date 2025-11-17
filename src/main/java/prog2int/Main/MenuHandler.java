@@ -1,10 +1,10 @@
 package prog2int.Main;
 
-import prog2int.Models.Persona;
+import prog2int.Models.Paciente;
 import java.util.List;
 import java.util.Scanner;
-import prog2int.Models.Domicilio;
-import prog2int.Service.PersonaServiceImpl;
+import prog2int.Models.HistoriaClinica;
+import prog2int.Services.
 
 /**
  * Controlador de las operaciones del menú (Menu Handler).
@@ -34,25 +34,25 @@ public class MenuHandler {
      * Servicio de personas para operaciones CRUD.
      * También proporciona acceso a DomicilioService mediante getDomicilioService().
      */
-    private final PersonaServiceImpl personaService;
+    private final prog2int.Service.PacienteServiceImpl pacienteService;
 
     /**
      * Constructor con inyección de dependencias.
      * Valida que las dependencias no sean null (fail-fast).
      *
      * @param scanner Scanner compartido para entrada de usuario
-     * @param personaService Servicio de personas
+     * @param pacienteService Servicio de personas
      * @throws IllegalArgumentException si alguna dependencia es null
      */
-    public MenuHandler(Scanner scanner, PersonaServiceImpl personaService) {
+    public MenuHandler(Scanner scanner, prog2int.Service.PacienteServiceImpl pacienteService) {
         if (scanner == null) {
             throw new IllegalArgumentException("Scanner no puede ser null");
         }
-        if (personaService == null) {
+        if (pacienteService == null) {
             throw new IllegalArgumentException("PersonaService no puede ser null");
         }
         this.scanner = scanner;
-        this.personaService = personaService;
+        this.pacienteService = pacienteService;
     }
 
     /**
@@ -76,7 +76,7 @@ public class MenuHandler {
      * - SQLException: Errores de BD (muestra mensaje al usuario)
      * - Todos los errores se capturan y muestran, NO se propagan al menú principal
      */
-    public void crearPersona() {
+    public void crearPaciente() {
         try {
             System.out.print("Nombre: ");
             String nombre = scanner.nextLine().trim();
@@ -85,16 +85,16 @@ public class MenuHandler {
             System.out.print("DNI: ");
             String dni = scanner.nextLine().trim();
 
-            Domicilio domicilio = null;
+            HistoriaClinica historiaClinica = null;
             System.out.print("¿Desea agregar un domicilio? (s/n): ");
             if (scanner.nextLine().equalsIgnoreCase("s")) {
-                domicilio = crearDomicilio();
+                historiaClinica = crearHistoriaClinica();
             }
 
-            Persona persona = new Persona(0, nombre, apellido, dni);
-            persona.setDomicilio(domicilio);
+            Paciente paciente = new Paciente(0, nombre, apellido, dni);
+            paciente.setHistoriaClinica(historiaClinica);
             personaService.insertar(persona);
-            System.out.println("Persona creada exitosamente con ID: " + persona.getId());
+            System.out.println("Persona creada exitosamente con ID: " + paciente.getId());
         } catch (Exception e) {
             System.err.println("Error al crear persona: " + e.getMessage());
         }
@@ -125,9 +125,9 @@ public class MenuHandler {
             System.out.print("¿Desea (1) listar todos o (2) buscar por nombre/apellido? Ingrese opcion: ");
             int subopcion = Integer.parseInt(scanner.nextLine());
 
-            List<Persona> personas;
+            List<Paciente> pacientes;
             if (subopcion == 1) {
-                personas = personaService.getAll();
+                pacientes = personaService.getAll();
             } else if (subopcion == 2) {
                 System.out.print("Ingrese texto a buscar: ");
                 String filtro = scanner.nextLine().trim();
