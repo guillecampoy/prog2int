@@ -149,7 +149,7 @@ CREATE TABLE historias_clinicas (
     medicacion_actual TEXT NULL,
     observaciones TEXT NULL,
     eliminado BOOLEAN DEFAULT FALSE,
-    CONSTRAINT fk_historia_paciente FOREIGN KEY (paciente_id) REFERENCES pacientes(id),
+    CONSTRAINT fk_historia_paciente FOREIGN KEY (paciente_id) REFERENCES paciente(id),
     CONSTRAINT uk_historia_paciente UNIQUE (paciente_id)
 );
 ```
