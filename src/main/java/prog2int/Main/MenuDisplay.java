@@ -1,5 +1,8 @@
 package prog2int.Main;
 
+import prog2int.ui.console.ContextColor;
+import prog2int.ui.console.UtilsColor;
+
 /**
  * Clase utilitaria para mostrar el menú de la aplicación.
  * Solo contiene métodos estáticos de visualización (no tiene estado).
@@ -17,19 +20,19 @@ public class MenuDisplay {
     /**
      * Muestra el menú principal con todas las opciones CRUD.
      *
-     * Opciones de Personas (1-4):
-     * 1. Crear persona: Permite crear persona con domicilio opcional
-     * 2. Listar personas: Lista todas o busca por nombre/apellido
-     * 3. Actualizar persona: Actualiza datos de persona y opcionalmente su domicilio
-     * 4. Eliminar persona: Soft delete de persona (NO elimina domicilio asociado)
+     * Opciones de Pacientes (1-4):
+     * 1. Crear paciente: Permite crear paciente con historia clínica opcional
+     * 2. Listar pacientes: Lista todas o busca por nombre/apellido
+     * 3. Actualizar paciente: Actualiza datos de paciente y opcionalmente su historia clínica
+     * 4. Eliminar paciente: Soft delete de paciente (NO elimina historia clínica asociada)
      *
-     * Opciones de Domicilios (5-10):
-     * 5. Crear domicilio: Crea domicilio independiente (sin asociar a persona)
-     * 6. Listar domicilios: Lista todos los domicilios activos
-     * 7. Actualizar domicilio por ID: Actualiza domicilio directamente (afecta a TODAS las personas)
-     * 8. Eliminar domicilio por ID: PELIGROSO - puede dejar FKs huérfanas (RN-029)
-     * 9. Actualizar domicilio por ID de persona: Busca persona primero, luego actualiza su domicilio
-     * 10. Eliminar domicilio por ID de persona: SEGURO - actualiza FK primero, luego elimina (RN-029)
+     * Opciones de Historia clínica (5-10):
+     * 5. Crear historia clínica: Crea historia clínica independiente (sin asociar a paciente)
+     * 6. Listar historias clínicas: Lista todas las historias clínicas activas
+     * 7. Actualizar historia clínica por ID: Actualiza historia clínica directamente (afecta a paciente)
+     * 8. Eliminar historia clínica por ID: PELIGROSO - puede dejar FKs huérfanas (RN-029)
+     * 9. Actualizar historia clínica por ID de paciente: Busca paciente primero, luego actualiza su historia clínica
+     * 10. Eliminar historia clínica por ID de paciente: SEGURO - actualiza FK primero, luego elimina (RN-029)
      *
      * Opción de salida:
      * 0. Salir: Termina la aplicación
@@ -42,18 +45,18 @@ public class MenuDisplay {
      * Nota: Los números de opción corresponden al switch en AppMenu.processOption().
      */
     public static void mostrarMenuPrincipal() {
-        System.out.println("\n========= MENU =========");
-        System.out.println("1. Crear persona");
-        System.out.println("2. Listar personas");
-        System.out.println("3. Actualizar persona");
-        System.out.println("4. Eliminar persona");
-        System.out.println("5. Crear domicilio");
-        System.out.println("6. Listar domicilios");
-        System.out.println("7. Actualizar domicilio por ID");
-        System.out.println("8. Eliminar domicilio por ID");
-        System.out.println("9. Actualizar domicilio por ID de persona");
-        System.out.println("10. Eliminar domicilio por ID de persona");
-        System.out.println("0. Salir");
-        System.out.print("Ingrese una opcion: ");
+        UtilsColor.imprimirBloque(ContextColor.INFO, "\n========= MENU =========");
+        UtilsColor.imprimirOpcionDefault("1. Crear paciente");
+        UtilsColor.imprimirOpcionDefault("2. Listar pacientes");
+        UtilsColor.imprimirOpcionDefault("3. Actualizar paciente");
+        UtilsColor.imprimirOpcionDefault("4. Eliminar paciente");
+        UtilsColor.imprimirOpcionDefault("5. Crear historia clínica");
+        UtilsColor.imprimirOpcionDefault("6. Listar historias clínicas");
+        UtilsColor.imprimirOpcionDefault("7. Actualizar historia clínica por ID");
+        UtilsColor.imprimirOpcionDefault("8. Eliminar historia clínica por ID");
+        UtilsColor.imprimirOpcionDefault("9. Actualizar historia clínica por ID de paciente");
+        UtilsColor.imprimirOpcionDefault("10. Eliminar historia clínica por ID de paciente");
+        UtilsColor.imprimirOpcionDefault("0. Salir");
+        UtilsColor.imprimirBloque(ContextColor.WARNING,"Ingrese una opción: ",'n');
     }
 }

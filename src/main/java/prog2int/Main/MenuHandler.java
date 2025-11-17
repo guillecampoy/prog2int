@@ -16,9 +16,9 @@ import java.util.Scanner;
  * Responsabilidades:
  * - Capturar entrada del usuario desde consola (Scanner)
  * - Validar entrada básica (conversión de tipos, valores vacíos)
- * - Invocar servicios de negocio (PersonaService, DomicilioService)
+ * - Invocar servicios de negocio (PacienteService, HistoriaClinicaService)
  * - Mostrar resultados y mensajes de error al usuario
- * - Coordinar operaciones complejas (crear persona con domicilio, etc.)
+ * - Coordinar operaciones complejas (crear paciente con historia clínica, etc.)
  *
  * Patrón: Controller (MVC) - capa de presentación en arquitectura de 4 capas
  * Arquitectura: Main → Service → DAO → Models
@@ -41,7 +41,7 @@ public class MenuHandler {
      * Valida que las dependencias no sean null (fail-fast).
      *
      * @param scanner Scanner compartido para entrada de usuario
-     * @param pacienteService Servicio de personas
+     * @param pacienteService Servicio de pacientes
      * @throws IllegalArgumentException si alguna dependencia es null
      */
     public MenuHandler(Scanner scanner, PacienteServiceImpl pacienteService, HistoriaClinicaServiceImpl historiaClinicaService) {
@@ -54,18 +54,18 @@ public class MenuHandler {
     }
 
     /**
-     * Opción 1: Crear nueva persona (con domicilio opcional).
+     * Opción 1: Crear nueva paciente (con historia clínica opcional).
      *
      * Flujo:
      * 1. Solicita nombre, apellido y DNI
-     * 2. Pregunta si desea agregar domicilio
+     * 2. Pregunta si desea agregar historia clínica
      * 3. Si sí, captura calle y número
-     * 4. Crea objeto Persona y opcionalmente Domicilio
-     * 5. Invoca personaService.insertar() que:
+     * 4. Crea objeto paciente y opcionalmente historia clínica
+     * 5. Invoca PacienteService.insertar() que:
      *    - Valida datos (nombre, apellido, DNI obligatorios)
      *    - Valida DNI único (RN-001)
-     *    - Si hay domicilio, lo inserta primero (obtiene ID)
-     *    - Inserta persona con FK domicilio_id correcta
+     *    - Si hay historia clínica, lo inserta primero (obtiene ID)
+     *    - Inserta paciente con FK historia clínica_id correcta
      *
      * Input trimming: Aplica .trim() a todas las entradas (patrón consistente).
      *
@@ -95,27 +95,27 @@ public class MenuHandler {
             pacienteService.insertar(paciente);
             System.out.println("Paciente creado exitosamente con ID: " + paciente.getId());
         } catch (Exception e) {
-            System.err.println("Error al crear paciente: " + e.getMessage());
+            System.err.println("\nError al crear paciente: " + e.getMessage());
         }
     }
 
     /**
-     * Opción 2: Listar personas (todas o filtradas por nombre/apellido).
+     * Opción 2: Listar pacientes (todas o filtradas por nombre/apellido).
      *
      * Submenú:
-     * 1. Listar todas las personas activas (getAll)
+     * 1. Listar todas las pacientes activas (getAll)
      * 2. Buscar por nombre o apellido con LIKE (buscarPorNombreApellido)
      *
      * Muestra:
      * - ID, Nombre, Apellido, DNI
-     * - Domicilio (si tiene): Calle Número
+     * - historia clínica (si tiene): Calle Número
      *
      * Manejo de casos especiales:
-     * - Si no hay personas: Muestra "No se encontraron personas"
-     * - Si la persona no tiene domicilio: Solo muestra datos de persona
+     * - Si no hay pacientes: Muestra "No se encontraron pacientes"
+     * - Si la paciente no tiene historia clínica: Solo muestra datos de paciente
      *
      * Búsqueda por nombre/apellido:
-     * - Usa PersonaDAO.buscarPorNombreApellido() que hace LIKE '%filtro%'
+     * - Usa pacienteDAO.buscarPorNombreApellido() que hace LIKE '%filtro%'
      * - Insensible a mayúsculas en MySQL (depende de collation)
      * - Busca en nombre O apellido
      */
@@ -155,30 +155,29 @@ public class MenuHandler {
     }
 
     /**
-     * Opción 3: Actualizar persona existente.
+     * Opción 3: Actualizar paciente existente.
      *
      * Flujo:
-     * 1. Solicita ID de la persona
-     * 2. Obtiene persona actual de la BD
+     * 1. Solicita ID del paciente
+     * 2. Obtiene paciente actual de la BD
      * 3. Muestra valores actuales y permite actualizar:
      *    - Nombre (Enter para mantener actual)
      *    - Apellido (Enter para mantener actual)
      *    - DNI (Enter para mantener actual)
-     * 4. Llama a actualizarDomicilioDePersona() para manejar cambios en domicilio
-     * 5. Invoca personaService.actualizar() que valida:
+     * 4. Llama a actualizar historia clínicaDepaciente() para manejar cambios en historia clínica
+     * 5. Invoca PacienteService.actualizar() que valida:
      *    - Datos obligatorios (nombre, apellido, DNI)
-     *    - DNI único (RN-001), excepto para la misma persona
+     *    - DNI único (RN-001), excepto para la misma paciente
      *
      * Patrón "Enter para mantener":
      * - Lee input con scanner.nextLine().trim()
      * - Si isEmpty() → NO actualiza el campo (mantiene valor actual)
      * - Si tiene valor → Actualiza el campo
      *
-     * IMPORTANTE: Esta operación NO actualiza el domicilio directamente.
-     * El domicilio se maneja en actualizarDomicilioDePersona() que puede:
-     * - Actualizar domicilio existente (afecta a TODAS las personas que lo comparten)
-     * - Agregar nuevo domicilio si la persona no tenía
-     * - Dejar domicilio sin cambios
+     * IMPORTANTE: Esta operación NO actualiza la historia clínica directamente.
+     * La historia clínica se maneja en actualizar historia clínica de paciente que puede:
+     * - Agregar nueva historia clínica si el paciente no tenía
+     * - Dejar historia clínica sin cambios
      */
     public void actualizarPaciente() {
         try {
@@ -211,21 +210,16 @@ public class MenuHandler {
     }
 
     /**
-     * Opción 4: Eliminar persona (soft delete).
+     * Opción 4: Eliminar paciente (soft delete).
      *
      * Flujo:
-     * 1. Solicita ID de la persona
-     * 2. Invoca personaService.eliminar() que:
-     *    - Marca persona.eliminado = TRUE
-     *    - NO elimina el domicilio asociado (RN-037)
-     *
-     * IMPORTANTE: El domicilio NO se elimina porque:
-     * - Múltiples personas pueden compartir un domicilio
-     * - Si se eliminara, afectaría a otras personas
-     *
-     * Si se quiere eliminar también el domicilio:
-     * - Usar opción 10: "Eliminar domicilio de una persona" (eliminarDomicilioPorPersona)
-     * - Esa opción primero desasocia el domicilio, luego lo elimina (seguro)
+     * 1. Solicita ID del paciente
+     * 2. Invoca PacienteService.eliminar() que:
+     *    - Marca paciente.eliminado = TRUE
+     *    - NO elimina la historia clínica asociada (RN-037)
+     * Si se quiere eliminar también la historia clínica:
+     * - Usar opción 10: "Eliminar historia clínica de un paciente" (eliminar historia clínica por paciente)
+     * - Esa opción primero desasocia la historia clínica, luego lo elimina (seguro)
      */
     public void eliminarPaciente() {
         try {
@@ -239,18 +233,18 @@ public class MenuHandler {
     }
 
     /**
-     * Opción 5: Crear domicilio independiente (sin asociar a persona).
+     * Opción 5: Crear historia clínica independiente (sin asociar a paciente).
      *
      * Flujo:
-     * 1. Llama a crearDomicilio() para capturar calle y número
-     * 2. Invoca domicilioService.insertar() que:
+     * 1. Llama a crearhistoria clínica() para capturar calle y número
+     * 2. Invoca HistoriaClinicaService.insertar() que:
      *    - Valida calle y número obligatorios (RN-023)
      *    - Inserta en BD y asigna ID autogenerado
      * 3. Muestra ID generado
      *
      * Uso típico:
-     * - Crear domicilio que luego se asignará a varias personas (opción 7)
-     * - Pre-cargar domicilios en la BD
+     * - Crear historia clínica que luego se asignará a varias pacientes (opción 7)
+     * - Pre-cargar historia clínicas en la BD
      */
     public void crearHistoriaClinicaIndependiente() {
         try {
@@ -263,15 +257,13 @@ public class MenuHandler {
     }
 
     /**
-     * Opción 6: Listar todos los domicilios activos.
-     *
-     * Muestra: ID, Calle Número
+     * Opción 6: Listar todas las historias clínicas activas.
      *
      * Uso típico:
-     * - Ver domicilios disponibles antes de asignar a persona (opción 7)
-     * - Consultar ID de domicilio para actualizar (opción 9) o eliminar (opción 8)
+     * - Ver historia clínicas disponibles antes de asignar a paciente (opción 7)
+     * - Consultar ID de historia clínica para actualizar (opción 9) o eliminar (opción 8)
      *
-     * Nota: Solo muestra domicilios con eliminado=FALSE (soft delete).
+     * Nota: Solo muestra historias clínicas con eliminado=FALSE (soft delete).
      */
     public void listarHistoriasClinicas() {
         try {
@@ -289,27 +281,17 @@ public class MenuHandler {
     }
 
     /**
-     * Opción 9: Actualizar domicilio por ID.
+     * Opción 9: Actualizar historia clínica por ID.
      *
      * Flujo:
-     * 1. Solicita ID del domicilio
-     * 2. Obtiene domicilio actual de la BD
+     * 1. Solicita ID de la historia clínica
+     * 2. Obtiene historia clínica actual de la BD
      * 3. Muestra valores actuales y permite actualizar:
      *    - Calle (Enter para mantener actual)
      *    - Número (Enter para mantener actual)
-     * 4. Invoca domicilioService.actualizar()
-     *
-     * ⚠️ IMPORTANTE (RN-040): Si varias personas comparten este domicilio,
-     * la actualización los afectará a TODAS.
-     *
-     * Ejemplo:
-     * - Domicilio ID=1 "Av. Siempreviva 742" está asociado a 3 personas
-     * - Si se actualiza a "Calle Nueva 123", las 3 personas tendrán la nueva dirección
-     *
-     * Esto es CORRECTO para familias que viven juntas.
-     * Si se quiere cambiar la dirección de UNA sola persona:
-     * 1. Crear nuevo domicilio (opción 5)
-     * 2. Asignar a la persona (opción 7)
+     * 4. Invoca HistoriaClinicaService.actualizar()
+     *  1. Crear nuevo historia clínica (opción 5)
+     *  2. Asignar a la paciente (opción 7)
      */
     public void actualizarHistoriaClinica() {
         try {
@@ -334,28 +316,28 @@ public class MenuHandler {
     }
 
     /**
-     * Opción 8: Eliminar domicilio por ID (PELIGROSO - soft delete directo).
+     * Opción 8: Eliminar historia clínica por ID (PELIGROSO - soft delete directo).
      *
-     * ⚠️ PELIGRO (RN-029): Este método NO verifica si hay personas asociadas.
-     * Si hay personas con FK a este domicilio, quedarán con referencia huérfana.
+     * ⚠️ PELIGRO (RN-029): Este método NO verifica si hay pacientes asociadas.
+     * Si hay pacientes con FK a este historia clínica, quedarán con referencia huérfana.
      *
      * Flujo:
-     * 1. Solicita ID del domicilio
-     * 2. Invoca domicilioService.eliminar() directamente
-     * 3. Marca domicilio.eliminado = TRUE
+     * 1. Solicita ID del historia clínica
+     * 2. Invoca HistoriaClinicaService.eliminar() directamente
+     * 3. Marca historia clínica.eliminado = TRUE
      *
      * Problemas potenciales:
-     * - Personas con domicilio_id apuntando a domicilio "eliminado"
+     * - pacientes con historia clínica_id apuntando a historia clínica "eliminado"
      * - Datos inconsistentes en la BD
      *
-     * ALTERNATIVA SEGURA: Opción 10 (eliminarDomicilioPorPersona)
-     * - Primero desasocia domicilio de la persona (domicilio_id = NULL)
-     * - Luego elimina el domicilio
+     * ALTERNATIVA SEGURA: Opción 10 (eliminarhistoria clínicaPorpaciente)
+     * - Primero desasocia historia clínica del paciente (historia clínica_id = NULL)
+     * - Luego elimina el historia clínica
      * - Garantiza consistencia
      *
      * Uso válido:
-     * - Cuando se está seguro de que el domicilio NO tiene personas asociadas
-     * - Limpiar domicilios creados por error
+     * - Cuando se está seguro de que el historia clínica NO tiene pacientes asociadas
+     * - Limpiar historia clínicas creados por error
      */
     public void eliminarHistoriaClinica() {
         try {
@@ -369,24 +351,23 @@ public class MenuHandler {
     }
 
     /**
-     * Opción 7: Actualizar domicilio de una persona específica.
+     * Opción 7: Actualizar historia clínica de un paciente específico.
      *
      * Flujo:
-     * 1. Solicita ID de la persona
-     * 2. Verifica que la persona exista y tenga domicilio
-     * 3. Muestra valores actuales del domicilio
-     * 4. Permite actualizar calle y número
-     * 5. Invoca domicilioService.actualizar()
+     * 1. Solicita ID del paciente
+     * 2. Verifica que el paciente exista y tenga historia clínica
+     * 3. Muestra valores actuales de historia clínica
+     * 4. Permite actualizar
+     * 5. Invoca HistoriaClinicaService.actualizar()
      *
-     * ⚠️ IMPORTANTE (RN-040): Esta operación actualiza el domicilio compartido.
-     * Si otras personas tienen el mismo domicilio, también se les actualizará.
+     * ⚠️ IMPORTANTE (RN-040): Esta operación actualiza la historia clínica.
      *
-     * Diferencia con opción 9 (actualizarDomicilioPorId):
-     * - Esta opción: Busca persona primero, luego actualiza su domicilio
-     * - Opción 9: Actualiza domicilio directamente por ID
+     * Diferencia con opción 9 (actualizar historia clínicaPorId):
+     * - Esta opción: Busca paciente primero, luego actualiza su historia clínica
+     * - Opción 9: Actualiza historia clínica directamente por ID
      *
-     * Ambas tienen el mismo efecto (RN-040): afectan a TODAS las personas
-     * que comparten el domicilio.
+     * Ambas tienen el mismo efecto (RN-040): afectan a TODAS las pacientes
+     * que comparten la historia clínica.
      */
     public void buscarPacientePorDni() {
         try {
@@ -410,17 +391,17 @@ public class MenuHandler {
     }
 
     /**
-     * Opción 10: Eliminar domicilio de una persona (MÉTODO SEGURO - RN-029 solucionado).
+     * Opción 10: Eliminar historia clínica de un paciente (MÉTODO SEGURO - RN-029 solucionado).
      *
      * Flujo transaccional SEGURO:
-     * 1. Solicita ID de la persona
-     * 2. Verifica que la persona exista y tenga domicilio
-     * 3. Invoca personaService.eliminarDomicilioDePersona() que:
-     *    a. Desasocia domicilio de persona (persona.domicilio = null)
-     *    b. Actualiza persona en BD (domicilio_id = NULL)
-     *    c. Elimina el domicilio (ahora no hay FKs apuntando a él)
+     * 1. Solicita ID del paciente
+     * 2. Verifica que la paciente exista y tenga historia clínica
+     * 3. Invoca PacienteService.eliminar historia clínicaDepaciente() que:
+     *    a. Desasocia historia clínica de paciente (paciente.historia clínica = null)
+     *    b. Actualiza paciente en BD (historia clínica_id = NULL)
+     *    c. Elimina el historia clínica (ahora no hay FKs apuntando a él)
      *
-     * Ventaja sobre opción 8 (eliminarDomicilioPorId):
+     * Ventaja sobre opción 8 (eliminar historia clínicaPorId):
      * - Garantiza consistencia: Primero actualiza FK, luego elimina
      * - NO deja referencias huérfanas
      * - Implementa eliminación segura recomendada en RN-029
@@ -450,22 +431,23 @@ public class MenuHandler {
     }
 
     /**
-     * Método auxiliar privado: Crea un objeto Domicilio capturando calle y número.
+     * Método auxiliar privado: Crea un objeto historia clínica.
      *
      * Flujo:
-     * 1. Solicita calle (con trim)
-     * 2. Solicita número (con trim)
-     * 3. Crea objeto Domicilio con ID=0 (será asignado por BD al insertar)
+     * 1. Solicita número (con trim)
+     * 2. Solicita grupo sanguíneo (con trim)
+     * 3. Solicita grupo antecedentes (con trim)
+     * 3. Crea objeto historia clínica con ID=0 (será asignado por BD al insertar)
      *
      * Usado por:
-     * - crearPersona(): Para agregar domicilio al crear persona
-     * - crearDomicilioIndependiente(): Para crear domicilio sin asociar
-     * - actualizarDomicilioDePersona(): Para agregar domicilio a persona sin domicilio
+     * - crearpaciente(): Para agregar historia clínica al crear paciente
+     * - crearhistoria clínicaIndependiente(): Para crear historia clínica sin asociar
+     * - actualizarhistoria clínicaDepaciente(): Para agregar historia clínica a paciente sin historia clínica
      *
      * Nota: NO persiste en BD, solo crea el objeto en memoria.
-     * El caller es responsable de insertar el domicilio.
+     * El caller es responsable de insertar el historia clínica.
      *
-     * @return Domicilio nuevo (no persistido, ID=0)
+     * @return historia clínica nuevo (no persistido, ID=0)
      */
     private HistoriaClinica crearHistoriaClinica() {
         System.out.print("Número de historia (HC-XXXX): ");
@@ -488,27 +470,27 @@ public class MenuHandler {
     }
 
     /**
-     * Método auxiliar privado: Maneja actualización de domicilio dentro de actualizar persona.
+     * Método auxiliar privado: Maneja actualización de historia clínica dentro de actualizar paciente.
      *
      * Casos:
-     * 1. Persona TIENE domicilio:
+     * 1. paciente TIENE historia clínica:
      *    - Pregunta si desea actualizar
      *    - Si sí, permite cambiar calle y número (Enter para mantener)
-     *    - Actualiza domicilio en BD (afecta a TODAS las personas que lo comparten)
+     *    - Actualiza historia clínica en BD (afecta a TODAS las pacientes que lo comparten)
      *
-     * 2. Persona NO TIENE domicilio:
+     * 2. paciente NO TIENE historia clínica:
      *    - Pregunta si desea agregar uno
-     *    - Si sí, captura calle y número con crearDomicilio()
-     *    - Inserta domicilio en BD (obtiene ID)
-     *    - Asocia domicilio a la persona
+     *    - Si sí, captura calle y número con crearhistoria clínica()
+     *    - Inserta historia clínica en BD (obtiene ID)
+     *    - Asocia historia clínica a la paciente
      *
-     * Usado exclusivamente por actualizarPersona() (opción 3).
+     * Usado exclusivamente por actualizarpaciente() (opción 3).
      *
-     * IMPORTANTE: El parámetro Persona se modifica in-place (setDomicilio).
-     * El caller debe invocar personaService.actualizar() después para persistir.
+     * IMPORTANTE: El parámetro paciente se modifica in-place (sethistoria clínica).
+     * El caller debe invocar PacienteService.actualizar() después para persistir.
      *
-     * @param p Persona a la que se le actualizará/agregará domicilio
-     * @throws Exception Si hay error al insertar/actualizar domicilio
+     * @param p paciente a la que se le actualizará/agregará historia clínica
+     * @throws Exception Si hay error al insertar/actualizar historia clínica
      */
 
 }
