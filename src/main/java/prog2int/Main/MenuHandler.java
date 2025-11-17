@@ -1,10 +1,13 @@
 package prog2int.Main;
 
 import prog2int.Models.Paciente;
+import prog2int.Models.HistoriaClinica;
+import prog2int.Models.HistoriaClinica.GrupoSanguineo;
+import prog2int.Services.PacienteServiceImpl;
+import prog2int.Services.HistoriaClinicaServiceImpl;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Scanner;
-import prog2int.Models.HistoriaClinica;
-import prog2int.Services.
 
 /**
  * Controlador de las operaciones del menú (Menu Handler).
@@ -30,11 +33,8 @@ public class MenuHandler {
      */
     private final Scanner scanner;
 
-    /**
-     * Servicio de personas para operaciones CRUD.
-     * También proporciona acceso a DomicilioService mediante getDomicilioService().
-     */
-    private final prog2int.Service.PacienteServiceImpl pacienteService;
+    private final PacienteServiceImpl pacienteService;
+    private final HistoriaClinicaServiceImpl historiaClinicaService;
 
     /**
      * Constructor con inyección de dependencias.
@@ -44,15 +44,13 @@ public class MenuHandler {
      * @param pacienteService Servicio de personas
      * @throws IllegalArgumentException si alguna dependencia es null
      */
-    public MenuHandler(Scanner scanner, prog2int.Service.PacienteServiceImpl pacienteService) {
-        if (scanner == null) {
-            throw new IllegalArgumentException("Scanner no puede ser null");
-        }
-        if (pacienteService == null) {
-            throw new IllegalArgumentException("PersonaService no puede ser null");
+    public MenuHandler(Scanner scanner, PacienteServiceImpl pacienteService, HistoriaClinicaServiceImpl historiaClinicaService) {
+        if (scanner == null || pacienteService == null || historiaClinicaService == null) {
+            throw new IllegalArgumentException("Dependencias no pueden ser null");
         }
         this.scanner = scanner;
         this.pacienteService = pacienteService;
+        this.historiaClinicaService = historiaClinicaService;
     }
 
     /**
@@ -84,19 +82,20 @@ public class MenuHandler {
             String apellido = scanner.nextLine().trim();
             System.out.print("DNI: ");
             String dni = scanner.nextLine().trim();
+            System.out.print("Fecha de nacimiento (YYYY-MM-DD): ");
+            LocalDate fechaNacimiento = LocalDate.parse(scanner.nextLine().trim());
 
             HistoriaClinica historiaClinica = null;
-            System.out.print("¿Desea agregar un domicilio? (s/n): ");
+            System.out.print("¿Desea agregar historia clínica? (s/n): ");
             if (scanner.nextLine().equalsIgnoreCase("s")) {
                 historiaClinica = crearHistoriaClinica();
             }
 
-            Paciente paciente = new Paciente(0, nombre, apellido, dni);
-            paciente.setHistoriaClinica(historiaClinica);
-            personaService.insertar(persona);
-            System.out.println("Persona creada exitosamente con ID: " + paciente.getId());
+            Paciente paciente = new Paciente(0, nombre, apellido, dni, fechaNacimiento, false, historiaClinica);
+            pacienteService.insertar(paciente);
+            System.out.println("Paciente creado exitosamente con ID: " + paciente.getId());
         } catch (Exception e) {
-            System.err.println("Error al crear persona: " + e.getMessage());
+            System.err.println("Error al crear paciente: " + e.getMessage());
         }
     }
 
@@ -120,38 +119,38 @@ public class MenuHandler {
      * - Insensible a mayúsculas en MySQL (depende de collation)
      * - Busca en nombre O apellido
      */
-    public void listarPersonas() {
+    public void listarPacientes() {
         try {
             System.out.print("¿Desea (1) listar todos o (2) buscar por nombre/apellido? Ingrese opcion: ");
             int subopcion = Integer.parseInt(scanner.nextLine());
 
             List<Paciente> pacientes;
             if (subopcion == 1) {
-                pacientes = personaService.getAll();
+                pacientes = pacienteService.getAll();
             } else if (subopcion == 2) {
                 System.out.print("Ingrese texto a buscar: ");
                 String filtro = scanner.nextLine().trim();
-                personas = personaService.buscarPorNombreApellido(filtro);
+                pacientes = pacienteService.buscarPorNombreApellido(filtro);
             } else {
                 System.out.println("Opcion invalida.");
                 return;
             }
 
-            if (personas.isEmpty()) {
-                System.out.println("No se encontraron personas.");
+            if (pacientes.isEmpty()) {
+                System.out.println("No se encontraron pacientes.");
                 return;
             }
 
-            for (Persona p : personas) {
+            for (Paciente p : pacientes) {
                 System.out.println("ID: " + p.getId() + ", Nombre: " + p.getNombre() +
                         ", Apellido: " + p.getApellido() + ", DNI: " + p.getDni());
-                if (p.getDomicilio() != null) {
-                    System.out.println("   Domicilio: " + p.getDomicilio().getCalle() +
-                            " " + p.getDomicilio().getNumero());
+                if (p.getHistoriaClinica() != null) {
+                    System.out.println("   Historia: " + p.getHistoriaClinica().getNroHistoria() +
+                            ", Grupo: " + p.getHistoriaClinica().getGrupoSanguineo());
                 }
             }
         } catch (Exception e) {
-            System.err.println("Error al listar personas: " + e.getMessage());
+            System.err.println("Error al listar pacientes: " + e.getMessage());
         }
     }
 
@@ -181,40 +180,33 @@ public class MenuHandler {
      * - Agregar nuevo domicilio si la persona no tenía
      * - Dejar domicilio sin cambios
      */
-    public void actualizarPersona() {
+    public void actualizarPaciente() {
         try {
-            System.out.print("ID de la persona a actualizar: ");
+            System.out.print("ID del paciente a actualizar: ");
             int id = Integer.parseInt(scanner.nextLine());
-            Persona p = personaService.getById(id);
+            Paciente p = pacienteService.getById(id);
 
             if (p == null) {
-                System.out.println("Persona no encontrada.");
+                System.out.println("Paciente no encontrado.");
                 return;
             }
 
             System.out.print("Nuevo nombre (actual: " + p.getNombre() + ", Enter para mantener): ");
             String nombre = scanner.nextLine().trim();
-            if (!nombre.isEmpty()) {
-                p.setNombre(nombre);
-            }
+            if (!nombre.isEmpty()) p.setNombre(nombre);
 
             System.out.print("Nuevo apellido (actual: " + p.getApellido() + ", Enter para mantener): ");
             String apellido = scanner.nextLine().trim();
-            if (!apellido.isEmpty()) {
-                p.setApellido(apellido);
-            }
+            if (!apellido.isEmpty()) p.setApellido(apellido);
 
             System.out.print("Nuevo DNI (actual: " + p.getDni() + ", Enter para mantener): ");
             String dni = scanner.nextLine().trim();
-            if (!dni.isEmpty()) {
-                p.setDni(dni);
-            }
+            if (!dni.isEmpty()) p.setDni(dni);
 
-            actualizarDomicilioDePersona(p);
-            personaService.actualizar(p);
-            System.out.println("Persona actualizada exitosamente.");
+            pacienteService.actualizar(p);
+            System.out.println("Paciente actualizado exitosamente.");
         } catch (Exception e) {
-            System.err.println("Error al actualizar persona: " + e.getMessage());
+            System.err.println("Error al actualizar paciente: " + e.getMessage());
         }
     }
 
@@ -235,14 +227,14 @@ public class MenuHandler {
      * - Usar opción 10: "Eliminar domicilio de una persona" (eliminarDomicilioPorPersona)
      * - Esa opción primero desasocia el domicilio, luego lo elimina (seguro)
      */
-    public void eliminarPersona() {
+    public void eliminarPaciente() {
         try {
-            System.out.print("ID de la persona a eliminar: ");
+            System.out.print("ID del paciente a eliminar: ");
             int id = Integer.parseInt(scanner.nextLine());
-            personaService.eliminar(id);
-            System.out.println("Persona eliminada exitosamente.");
+            pacienteService.eliminar(id);
+            System.out.println("Paciente eliminado exitosamente.");
         } catch (Exception e) {
-            System.err.println("Error al eliminar persona: " + e.getMessage());
+            System.err.println("Error al eliminar paciente: " + e.getMessage());
         }
     }
 
@@ -260,13 +252,13 @@ public class MenuHandler {
      * - Crear domicilio que luego se asignará a varias personas (opción 7)
      * - Pre-cargar domicilios en la BD
      */
-    public void crearDomicilioIndependiente() {
+    public void crearHistoriaClinicaIndependiente() {
         try {
-            Domicilio domicilio = crearDomicilio();
-            personaService.getDomicilioService().insertar(domicilio);
-            System.out.println("Domicilio creado exitosamente con ID: " + domicilio.getId());
+            HistoriaClinica hc = crearHistoriaClinica();
+            historiaClinicaService.insertar(hc);
+            System.out.println("Historia clínica creada con ID: " + hc.getId());
         } catch (Exception e) {
-            System.err.println("Error al crear domicilio: " + e.getMessage());
+            System.err.println("Error al crear historia clínica: " + e.getMessage());
         }
     }
 
@@ -281,18 +273,18 @@ public class MenuHandler {
      *
      * Nota: Solo muestra domicilios con eliminado=FALSE (soft delete).
      */
-    public void listarDomicilios() {
+    public void listarHistoriasClinicas() {
         try {
-            List<Domicilio> domicilios = personaService.getDomicilioService().getAll();
-            if (domicilios.isEmpty()) {
-                System.out.println("No se encontraron domicilios.");
+            List<HistoriaClinica> historias = historiaClinicaService.getAll();
+            if (historias.isEmpty()) {
+                System.out.println("No se encontraron historias clínicas.");
                 return;
             }
-            for (Domicilio d : domicilios) {
-                System.out.println("ID: " + d.getId() + ", " + d.getCalle() + " " + d.getNumero());
+            for (HistoriaClinica h : historias) {
+                System.out.println("ID: " + h.getId() + ", Nro: " + h.getNroHistoria() + ", Grupo: " + h.getGrupoSanguineo());
             }
         } catch (Exception e) {
-            System.err.println("Error al listar domicilios: " + e.getMessage());
+            System.err.println("Error al listar historias clínicas: " + e.getMessage());
         }
     }
 
@@ -319,33 +311,25 @@ public class MenuHandler {
      * 1. Crear nuevo domicilio (opción 5)
      * 2. Asignar a la persona (opción 7)
      */
-    public void actualizarDomicilioPorId() {
+    public void actualizarHistoriaClinica() {
         try {
-            System.out.print("ID del domicilio a actualizar: ");
+            System.out.print("ID de la historia clínica a actualizar: ");
             int id = Integer.parseInt(scanner.nextLine());
-            Domicilio d = personaService.getDomicilioService().getById(id);
+            HistoriaClinica h = historiaClinicaService.getById(id);
 
-            if (d == null) {
-                System.out.println("Domicilio no encontrado.");
+            if (h == null) {
+                System.out.println("Historia clínica no encontrada.");
                 return;
             }
 
-            System.out.print("Nueva calle (actual: " + d.getCalle() + ", Enter para mantener): ");
-            String calle = scanner.nextLine().trim();
-            if (!calle.isEmpty()) {
-                d.setCalle(calle);
-            }
+            System.out.print("Antecedentes (actual: " + h.getAntecedentes() + ", Enter para mantener): ");
+            String antecedentes = scanner.nextLine().trim();
+            if (!antecedentes.isEmpty()) h.setAntecedentes(antecedentes);
 
-            System.out.print("Nuevo numero (actual: " + d.getNumero() + ", Enter para mantener): ");
-            String numero = scanner.nextLine().trim();
-            if (!numero.isEmpty()) {
-                d.setNumero(numero);
-            }
-
-            personaService.getDomicilioService().actualizar(d);
-            System.out.println("Domicilio actualizado exitosamente.");
+            historiaClinicaService.actualizar(h);
+            System.out.println("Historia clínica actualizada exitosamente.");
         } catch (Exception e) {
-            System.err.println("Error al actualizar domicilio: " + e.getMessage());
+            System.err.println("Error al actualizar historia clínica: " + e.getMessage());
         }
     }
 
@@ -373,14 +357,14 @@ public class MenuHandler {
      * - Cuando se está seguro de que el domicilio NO tiene personas asociadas
      * - Limpiar domicilios creados por error
      */
-    public void eliminarDomicilioPorId() {
+    public void eliminarHistoriaClinica() {
         try {
-            System.out.print("ID del domicilio a eliminar: ");
+            System.out.print("ID de la historia clínica a eliminar: ");
             int id = Integer.parseInt(scanner.nextLine());
-            personaService.getDomicilioService().eliminar(id);
-            System.out.println("Domicilio eliminado exitosamente.");
+            historiaClinicaService.eliminar(id);
+            System.out.println("Historia clínica eliminada exitosamente.");
         } catch (Exception e) {
-            System.err.println("Error al eliminar domicilio: " + e.getMessage());
+            System.err.println("Error al eliminar historia clínica: " + e.getMessage());
         }
     }
 
@@ -404,39 +388,24 @@ public class MenuHandler {
      * Ambas tienen el mismo efecto (RN-040): afectan a TODAS las personas
      * que comparten el domicilio.
      */
-    public void actualizarDomicilioPorPersona() {
+    public void buscarPacientePorDni() {
         try {
-            System.out.print("ID de la persona cuyo domicilio desea actualizar: ");
-            int personaId = Integer.parseInt(scanner.nextLine());
-            Persona p = personaService.getById(personaId);
+            System.out.print("DNI del paciente: ");
+            String dni = scanner.nextLine().trim();
+            Paciente p = pacienteService.buscarPorDni(dni);
 
             if (p == null) {
-                System.out.println("Persona no encontrada.");
+                System.out.println("Paciente no encontrado.");
                 return;
             }
 
-            if (p.getDomicilio() == null) {
-                System.out.println("La persona no tiene domicilio asociado.");
-                return;
+            System.out.println("ID: " + p.getId() + ", Nombre: " + p.getNombre() +
+                    ", Apellido: " + p.getApellido() + ", DNI: " + p.getDni());
+            if (p.getHistoriaClinica() != null) {
+                System.out.println("   Historia: " + p.getHistoriaClinica().getNroHistoria());
             }
-
-            Domicilio d = p.getDomicilio();
-            System.out.print("Nueva calle (" + d.getCalle() + "): ");
-            String calle = scanner.nextLine().trim();
-            if (!calle.isEmpty()) {
-                d.setCalle(calle);
-            }
-
-            System.out.print("Nuevo numero (" + d.getNumero() + "): ");
-            String numero = scanner.nextLine().trim();
-            if (!numero.isEmpty()) {
-                d.setNumero(numero);
-            }
-
-            personaService.getDomicilioService().actualizar(d);
-            System.out.println("Domicilio actualizado exitosamente.");
         } catch (Exception e) {
-            System.err.println("Error al actualizar domicilio: " + e.getMessage());
+            System.err.println("Error al buscar paciente: " + e.getMessage());
         }
     }
 
@@ -458,27 +427,25 @@ public class MenuHandler {
      *
      * Este es el método RECOMENDADO para eliminar domicilios en producción.
      */
-    public void eliminarDomicilioPorPersona() {
+    public void buscarHistoriaPorNumero() {
         try {
-            System.out.print("ID de la persona cuyo domicilio desea eliminar: ");
-            int personaId = Integer.parseInt(scanner.nextLine());
-            Persona p = personaService.getById(personaId);
+            System.out.print("Número de historia: ");
+            String nro = scanner.nextLine().trim();
+            List<HistoriaClinica> historias = historiaClinicaService.getAll();
+            HistoriaClinica h = historias.stream()
+                .filter(hc -> hc.getNroHistoria().equals(nro))
+                .findFirst()
+                .orElse(null);
 
-            if (p == null) {
-                System.out.println("Persona no encontrada.");
+            if (h == null) {
+                System.out.println("Historia clínica no encontrada.");
                 return;
             }
 
-            if (p.getDomicilio() == null) {
-                System.out.println("La persona no tiene domicilio asociado.");
-                return;
-            }
-
-            int domicilioId = p.getDomicilio().getId();
-            personaService.eliminarDomicilioDePersona(personaId, domicilioId);
-            System.out.println("Domicilio eliminado exitosamente y referencia actualizada.");
+            System.out.println("ID: " + h.getId() + ", Nro: " + h.getNroHistoria() +
+                    ", Grupo: " + h.getGrupoSanguineoSymbol());
         } catch (Exception e) {
-            System.err.println("Error al eliminar domicilio: " + e.getMessage());
+            System.err.println("Error al buscar historia: " + e.getMessage());
         }
     }
 
@@ -500,12 +467,24 @@ public class MenuHandler {
      *
      * @return Domicilio nuevo (no persistido, ID=0)
      */
-    private Domicilio crearDomicilio() {
-        System.out.print("Calle: ");
-        String calle = scanner.nextLine().trim();
-        System.out.print("Numero: ");
-        String numero = scanner.nextLine().trim();
-        return new Domicilio(0, calle, numero);
+    private HistoriaClinica crearHistoriaClinica() {
+        System.out.print("Número de historia (HC-XXXX): ");
+        String nro = scanner.nextLine().trim();
+        System.out.print("Grupo sanguíneo (A+, A-, B+, B-, AB+, AB-, O+, O-): ");
+        String grupoStr = scanner.nextLine().trim();
+        GrupoSanguineo grupo = parseGrupoSanguineo(grupoStr);
+        System.out.print("Antecedentes: ");
+        String antecedentes = scanner.nextLine().trim();
+        return new HistoriaClinica(0, false, nro, grupo, antecedentes, null, null);
+    }
+
+    private GrupoSanguineo parseGrupoSanguineo(String simbolo) {
+        for (GrupoSanguineo gs : GrupoSanguineo.values()) {
+            if (gs.getSimbolo().equalsIgnoreCase(simbolo)) {
+                return gs;
+            }
+        }
+        return GrupoSanguineo.O_POSITIVO;
     }
 
     /**
@@ -531,31 +510,5 @@ public class MenuHandler {
      * @param p Persona a la que se le actualizará/agregará domicilio
      * @throws Exception Si hay error al insertar/actualizar domicilio
      */
-    private void actualizarDomicilioDePersona(Persona p) throws Exception {
-        if (p.getDomicilio() != null) {
-            System.out.print("¿Desea actualizar el domicilio? (s/n): ");
-            if (scanner.nextLine().equalsIgnoreCase("s")) {
-                System.out.print("Nueva calle (" + p.getDomicilio().getCalle() + "): ");
-                String calle = scanner.nextLine().trim();
-                if (!calle.isEmpty()) {
-                    p.getDomicilio().setCalle(calle);
-                }
 
-                System.out.print("Nuevo numero (" + p.getDomicilio().getNumero() + "): ");
-                String numero = scanner.nextLine().trim();
-                if (!numero.isEmpty()) {
-                    p.getDomicilio().setNumero(numero);
-                }
-
-                personaService.getDomicilioService().actualizar(p.getDomicilio());
-            }
-        } else {
-            System.out.print("La persona no tiene domicilio. ¿Desea agregar uno? (s/n): ");
-            if (scanner.nextLine().equalsIgnoreCase("s")) {
-                Domicilio nuevoDom = crearDomicilio();
-                personaService.getDomicilioService().insertar(nuevoDom);
-                p.setDomicilio(nuevoDom);
-            }
-        }
-    }
 }

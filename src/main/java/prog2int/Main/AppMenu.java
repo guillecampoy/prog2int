@@ -1,9 +1,10 @@
 package prog2int.Main;
 
 import java.util.Scanner;
-import prog2int.Dao.DomicilioDAO;
-import prog2int.Dao.PersonaDAO;
-import prog2int.Service.DomicilioServiceImpl;
+import prog2int.Dao.PacienteDAO;
+import prog2int.Dao.HistoriaClinicaDAO;
+import prog2int.Services.PacienteServiceImpl;
+import prog2int.Services.HistoriaClinicaServiceImpl;
 
 /**
  * Orquestador principal del menú de la aplicación.
@@ -62,8 +63,11 @@ public class AppMenu {
      */
     public AppMenu() {
         this.scanner = new Scanner(System.in);
-        prog2int.Service.PacienteServiceImpl personaService = createPersonaService();
-        this.menuHandler = new MenuHandler(scanner, personaService);
+        HistoriaClinicaDAO historiaDAO = new HistoriaClinicaDAO();
+        PacienteDAO pacienteDAO = new PacienteDAO(historiaDAO);
+        HistoriaClinicaServiceImpl historiaService = new HistoriaClinicaServiceImpl(historiaDAO);
+        PacienteServiceImpl pacienteService = new PacienteServiceImpl(pacienteDAO, historiaService);
+        this.menuHandler = new MenuHandler(scanner, pacienteService, historiaService);
         this.running = true;
     }
 
@@ -141,16 +145,16 @@ public class AppMenu {
      */
     private void processOption(int opcion) {
         switch (opcion) {
-            case 1 -> menuHandler.crearPersona();
-            case 2 -> menuHandler.listarPersonas();
-            case 3 -> menuHandler.actualizarPersona();
-            case 4 -> menuHandler.eliminarPersona();
-            case 5 -> menuHandler.crearDomicilioIndependiente();
-            case 6 -> menuHandler.listarDomicilios();
-            case 7 -> menuHandler.actualizarDomicilioPorId();
-            case 8 -> menuHandler.eliminarDomicilioPorId();
-            case 9 -> menuHandler.actualizarDomicilioPorPersona();
-            case 10 -> menuHandler.eliminarDomicilioPorPersona();
+            case 1 -> menuHandler.crearPaciente();
+            case 2 -> menuHandler.listarPacientes();
+            case 3 -> menuHandler.buscarPacientePorDni();
+            case 4 -> menuHandler.actualizarPaciente();
+            case 5 -> menuHandler.eliminarPaciente();
+            case 6 -> menuHandler.crearHistoriaClinicaIndependiente();
+            case 7 -> menuHandler.listarHistoriasClinicas();
+            case 8 -> menuHandler.actualizarHistoriaClinica();
+            case 9 -> menuHandler.eliminarHistoriaClinica();
+            case 10 -> menuHandler.buscarHistoriaPorNumero();
             case 0 -> {
                 System.out.println("Saliendo...");
                 running = false;
@@ -190,10 +194,5 @@ public class AppMenu {
      *
      * @return PersonaServiceImpl completamente inicializado con todas sus dependencias
      */
-    private prog2int.Service.PacienteServiceImpl createPersonaService() {
-        DomicilioDAO domicilioDAO = new DomicilioDAO();
-        PersonaDAO personaDAO = new PersonaDAO(domicilioDAO);
-        DomicilioServiceImpl domicilioService = new DomicilioServiceImpl(domicilioDAO);
-        return new prog2int.Service.PacienteServiceImpl(personaDAO, domicilioService);
-    }
+
 }
