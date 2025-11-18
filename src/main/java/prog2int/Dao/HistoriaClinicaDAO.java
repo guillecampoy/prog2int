@@ -62,6 +62,8 @@ public class HistoriaClinicaDAO implements GenericDAO<HistoriaClinica> {
      * El campo eliminado tiene DEFAULT FALSE en la BD
      */
     private static final String INSERT_SQL = "INSERT INTO historias_clinicas (nro_historia, grupo_sanguineo, antecedentes, medicacion_actual, observaciones) VALUES (?, ?, ?, ?, ?)";
+    
+    private static final String INSERT_WITH_PACIENTE_SQL = "INSERT INTO historias_clinicas (nro_historia, paciente_id, grupo_sanguineo, antecedentes, medicacion_actual, observaciones) VALUES (?, ?, ?, ?, ?, ?)";
 
     /**
      * Sentencia SQL para actualizar los datos de una historia clínica existente
@@ -183,6 +185,19 @@ public class HistoriaClinicaDAO implements GenericDAO<HistoriaClinica> {
         try (PreparedStatement stmt = conn.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS)) {
             
             setHistoriaClinicaParameters(stmt, historiaClinica);
+            stmt.executeUpdate();
+            setGeneratedId(stmt, historiaClinica);
+        }
+    }
+    
+    public void insertWithPacienteTx(HistoriaClinica historiaClinica, int pacienteId, Connection conn) throws Exception {
+        try (PreparedStatement stmt = conn.prepareStatement(INSERT_WITH_PACIENTE_SQL, Statement.RETURN_GENERATED_KEYS)) {
+            stmt.setString(1, historiaClinica.getNroHistoria());
+            stmt.setInt(2, pacienteId);
+            stmt.setString(3, historiaClinica.getGrupoSanguineo().getSimbolo());
+            stmt.setString(4, historiaClinica.getAntecedentes());
+            stmt.setString(5, historiaClinica.getMedicacionActual());
+            stmt.setString(6, historiaClinica.getObservaciones());
             stmt.executeUpdate();
             setGeneratedId(stmt, historiaClinica);
         }
@@ -756,11 +771,20 @@ public class HistoriaClinicaDAO implements GenericDAO<HistoriaClinica> {
             rs.getInt("id"),
             rs.getBoolean("eliminado"),
             rs.getString("nro_historia"),
-            GrupoSanguineo.valueOf(rs.getString("grupo_sanguineo")),
+            parseGrupoSanguineo(rs.getString("grupo_sanguineo")),
             rs.getString("antecedentes"),
             rs.getString("medicacion_actual"),
             rs.getString("observaciones")
         );
+    }
+    
+    private GrupoSanguineo parseGrupoSanguineo(String simbolo) {
+        for (GrupoSanguineo gs : GrupoSanguineo.values()) {
+            if (gs.getSimbolo().equals(simbolo)) {
+                return gs;
+            }
+        }
+        return GrupoSanguineo.O_POSITIVO;
     }
 
 }

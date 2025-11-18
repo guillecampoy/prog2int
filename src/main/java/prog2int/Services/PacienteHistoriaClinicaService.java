@@ -42,14 +42,14 @@ public class PacienteHistoriaClinicaService {
             tm.startTransaction();
             
             try {
-                // 1. Insertar historia clínica
-                historiaClinicaDAO.insertTx(historia, tm.getConnection());
-                
-                // 2. Asociar historia al paciente
-                paciente.setHistoriaClinica(historia);
-                
-                // 3. Insertar paciente
+                // 1. Insertar paciente primero
                 pacienteDAO.insertTx(paciente, tm.getConnection());
+                
+                // 2. Insertar historia clínica con paciente_id
+                historiaClinicaDAO.insertWithPacienteTx(historia, paciente.getId(), tm.getConnection());
+                
+                // 3. Asociar historia al paciente
+                paciente.setHistoriaClinica(historia);
                 
                 tm.commit();
             } catch (Exception e) {
