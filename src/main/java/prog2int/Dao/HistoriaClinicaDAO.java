@@ -73,12 +73,6 @@ public class HistoriaClinicaDAO implements GenericDAO<HistoriaClinica> {
     private static final String UPDATE_SQL = "UPDATE historias_clinicas SET nro_historia = ?, grupo_sanguineo = ?, antecedentes = ?, medicacion_actual = ?, observaciones = ? WHERE id = ?";
 
     /**
-     * Sentencia SQL para actualizar el ID del paciente asociado a una historia clínica
-     * NO actualiza ningún otro campo de la tabla
-     */
-    private static final String UPDATE_ID_PACIENTE_SQL = "UPDATE historias_clinicas SET paciente_id = ? WHERE id = ?";
-
-    /**
      * Sentencia SQL para eliminación lógica (soft delete)
      * Marca eliminado=TRUE sin borrar físicamente la fila
      * Preserva integridad referencial y datos históricos
@@ -261,61 +255,6 @@ public class HistoriaClinicaDAO implements GenericDAO<HistoriaClinica> {
             int rowsAffected = stmt.executeUpdate();
             if (rowsAffected == 0) {
                 throw new SQLException("No se pudo actualizar el historial con ID: " + historiaClinica.getId());
-            }
-        }
-    }
-
-    /**
-     * Actualiza el ID del paciente en una historia clínica existente en la base de datos
-     * <p>
-     * Validaciones:
-     * <ul>
-     *   <li>Si rowsAffected == 0 → La historia clínica no existe o ya está eliminada</li>
-     * </ul>
-     *
-     * @param pacienteId ID del paciente a asignar (debe ser > 0)
-     * @param historiaId ID de la historia clínica a actualizar (debe ser > 0)
-     * @throws Exception Si la historia clínica no existe o hay error de BD
-     */
-    public void actualizarPaciente(int pacienteId, int historiaId) throws Exception {
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(UPDATE_ID_PACIENTE_SQL)) {
-
-            stmt.setInt(1, pacienteId);
-            stmt.setInt(2, historiaId);
-
-            int rowsAffected = stmt.executeUpdate();
-            if (rowsAffected == 0) {
-                throw new SQLException("No se pudo actualizar el historial con ID: " + historiaId);
-            }
-        }
-    }
-
-    /**
-     * Actualiza el ID del paciente en una historia clínica dentro de una transacción existente
-     * NO crea nueva conexión, recibe una Connection externa
-     * NO cierra la conexión (responsabilidad del caller con TransactionManager)
-     * <p>
-     * Usado por:
-     * <ul>
-     *   <li>Operaciones que requieren múltiples updates coordinados</li>
-     *   <li>Rollback automático si alguna operación falla</li>
-     * </ul>
-     *
-     * @param pacienteId ID del paciente a asignar (debe ser > 0)
-     * @param historiaId ID de la historia clínica a actualizar (debe ser > 0)
-     * @param conn Conexión transaccional (NO se cierra en este método)
-     * @throws Exception Si falla la actualización
-     */
-    public void updatePacienteTx(int pacienteId, int historiaId, Connection conn) throws Exception {
-        try (PreparedStatement stmt = conn.prepareStatement(UPDATE_ID_PACIENTE_SQL)) {
-
-            stmt.setInt(1, pacienteId);
-            stmt.setInt(2, historiaId);
-
-            int rowsAffected = stmt.executeUpdate();
-            if (rowsAffected == 0) {
-                throw new SQLException("No se pudo actualizar el historial con ID: " + historiaId);
             }
         }
     }
