@@ -793,7 +793,17 @@ public class PacienteDAO implements GenericDAO<Paciente> {
             HistoriaClinica historiaClinica = new HistoriaClinica();
             historiaClinica.setId(rs.getInt("hc.id"));
             historiaClinica.setNroHistoria(rs.getString("hc.nro_historia"));
-            historiaClinica.setGrupoSanguineo(GrupoSanguineo.valueOf(rs.getString("grupo_sanguineo")));
+            
+            String grupoStr = rs.getString("grupo_sanguineo");
+            GrupoSanguineo grupo = GrupoSanguineo.O_POSITIVO;
+            for (GrupoSanguineo gs : GrupoSanguineo.values()) {
+                if (gs.getSimbolo().equals(grupoStr)) {
+                    grupo = gs;
+                    break;
+                }
+            }
+            historiaClinica.setGrupoSanguineo(grupo);
+            
             historiaClinica.setAntecedentes(rs.getString("hc.antecedentes"));
             historiaClinica.setMedicacionActual(rs.getString("hc.medicacion_actual"));
             historiaClinica.setObservaciones(rs.getString("hc.observaciones"));

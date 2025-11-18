@@ -22,7 +22,7 @@ import java.sql.SQLException;
  */
 public final class DatabaseConnection {
     /** URL de conexión JDBC. Configurable via -Ddb.url */
-    private static final String URL = System.getProperty("db.url", "jdbc:mysql://localhost:3306/dbtpi3");
+    private static final String URL = System.getProperty("db.url", "jdbc:mysql://localhost:3306/db_historiaclinica");
 
     /** Usuario de la base de datos. Configurable via -Ddb.user */
     private static final String USER = System.getProperty("db.user", "root");
