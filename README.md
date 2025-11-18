@@ -236,16 +236,14 @@ Driver: MySQL Connector/J v8.4.0
 ========= MENU =========
 1. Crear paciente
 2. Listar pacientes
-3. Buscar paciente por DNI
-4. Actualizar paciente
-5. Eliminar paciente
-6. Crear historia clínica
-7. Listar historias clínicas
-8. Actualizar historia clínica
-9. Eliminar historia clínica
-10. Buscar historia clínica por número
-11. Listar pacientes por grupo sanguíneo
-12. Listar pacientes (modo auditor)
+3. Actualizar paciente
+4. Eliminar paciente
+5. Crear historia clínica
+6. Listar historias clínicas
+7. Actualizar historia clínica por ID
+8. Eliminar historia clínica por ID
+9. Actualizar historia clínica por ID de paciente
+10.Eliminar historia clínica por ID de paciente
 0. Salir
 ```
 
