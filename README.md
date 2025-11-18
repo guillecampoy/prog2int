@@ -14,11 +14,11 @@
 > Trabajo realizado en equipo (4 integrantes). Completar con los datos reales del grupo.
 
 |                                                            Integrante | Rol principal (sugerido) |
-|----------------------------------------------------------------------:|-------------------------|
-|Luis Cisneros - [@luiscisneros356](https://github.com/luiscisneros356) | DETALLAR                |
-|           Nicolás Colman - [@ncolman94](https://github.com/ncolman94) | DETALLAR                |
-|  Santiago Caiciia Massello - [@scaiciia](https://github.com/scaiciia) | DETALLAR                |
-|   Guillermo Campoy - [@guillecampoy](https://github.com/guillecampoy) | DETALLAR                | 
+|----------------------------------------------------------------------:|-----------------|
+|Luis Cisneros - [@luiscisneros356](https://github.com/luiscisneros356) | Diagrama UML, Modelo Paciente-HC                |
+|           Nicolás Colman - [@ncolman94](https://github.com/ncolman94) | Services (Generic, Paciente, Historia Clínica)        |
+|  Santiago Caiciia Massello - [@scaiciia](https://github.com/scaiciia) | DAOs, JDBC, Prepared Statement.        |
+|   Guillermo Campoy - [@guillecampoy](https://github.com/guillecampoy) | Setup inicial, documentación, menú, UI        | 
 
 ---
 
