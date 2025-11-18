@@ -46,17 +46,17 @@ public class MenuDisplay {
      */
     public static void mostrarMenuPrincipal() {
         UtilsColor.imprimirBloque(ContextColor.INFO, "\n========= MENU =========");
-        UtilsColor.imprimirOpcionDefault("1. Crear paciente");
-        UtilsColor.imprimirOpcionDefault("2. Listar pacientes");
-        UtilsColor.imprimirOpcionDefault("3. Actualizar paciente");
-        UtilsColor.imprimirOpcionDefault("4. Eliminar paciente");
-        UtilsColor.imprimirOpcionDefault("5. Crear historia clínica");
-        UtilsColor.imprimirOpcionDefault("6. Listar historias clínicas");
-        UtilsColor.imprimirOpcionDefault("7. Actualizar historia clínica por ID");
-        UtilsColor.imprimirOpcionDefault("8. Eliminar historia clínica por ID");
-        UtilsColor.imprimirOpcionDefault("9. Actualizar historia clínica por ID de paciente");
-        UtilsColor.imprimirOpcionDefault("10. Eliminar historia clínica por ID de paciente");
-        UtilsColor.imprimirOpcionDefault("0. Salir");
+        UtilsColor.imprimirOpcionDefault("1.  Crear paciente");
+        UtilsColor.imprimirOpcionDefault("2.  Listar pacientes");
+        UtilsColor.imprimirOpcionDefault("3.  Buscar paciente por DNI");
+        UtilsColor.imprimirOpcionDefault("4.  Actualizar Paciente");
+        UtilsColor.imprimirOpcionDefault("5.  Eliminar paciente");
+        UtilsColor.imprimirOpcionDefault("6.  Crear historia clínica (independiente)");
+        UtilsColor.imprimirOpcionDefault("7.  Listar historias clínicas");
+        UtilsColor.imprimirOpcionDefault("8.  Actualizar historia clínica");
+        UtilsColor.imprimirOpcionDefault("9.  Eliminar historia clínica");
+        UtilsColor.imprimirOpcionDefault("10. Buscar historia clínica por número");
+        UtilsColor.imprimirOpcionDefault("0.  Salir");
         UtilsColor.imprimirBloque(ContextColor.WARNING,"Ingrese una opción: ",'n');
     }
 }
