@@ -28,7 +28,7 @@ public final class DatabaseConnection {
     private static final String USER = System.getProperty("db.user", "root");
 
     /** Contraseña del usuario. Configurable via -Ddb.password */
-    private static final String PASSWORD = System.getProperty("db.password", "1234");
+    private static final String PASSWORD = System.getProperty("db.password", "");
 
     /**
      * Bloque de inicialización estática.
