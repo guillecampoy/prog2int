@@ -11,8 +11,6 @@
 
 ## Integrantes 👥
 
-> Trabajo realizado en equipo (4 integrantes). Completar con los datos reales del grupo.
-
 |                                                            Integrante | Rol principal (sugerido) |
 |----------------------------------------------------------------------:|-----------------|
 |Luis Cisneros - [@luiscisneros356](https://github.com/luiscisneros356) | Diagrama UML, Modelo Paciente-HC                |
